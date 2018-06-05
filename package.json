@@ -1,0 +1,19 @@
+{
+  "name": "uccportal",
+  "version": "1.0.0",
+  "description": "A management portal for UCC members.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "frekk",
+  "license": "GPL3",
+  "devDependencies": {
+    "nodemon": "^1.17.5"
+  },
+  "dependencies": {
+    "express": "^4.16.3",
+    "mongoose": "^5.1.4"
+  }
+}
