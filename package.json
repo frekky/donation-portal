@@ -1,19 +1,27 @@
 {
   "name": "uccportal",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A management portal for UCC members.",
   "main": "server.js",
   "scripts": {
     "test": "echo \"No test specified\" && exit 1",
     "start": "nodemon server.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.ucc.asn.au/frekk/uccportal.git"
+  },
   "author": "frekk",
-  "license": "GPL3",
+  "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "nodemon": "^1.17.5"
+    "nodemon": "^1.17.5",
+    "pg": "^7.4.3"
   },
   "dependencies": {
-    "express": "^4.16.3",
-    "mongoose": "^5.1.4"
+    "mongoose": "^5.1.4",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "express": "~4.16.0",
+    "morgan": "~1.9.0"
   }
 }
