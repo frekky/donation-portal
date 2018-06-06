@@ -1,5 +1,5 @@
 'use strict';
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 // Here we define the schema used by the model for gumby documents
 var memberSchema = mongoose.Schema({

@@ -3,30 +3,58 @@
 /* script to import users from memberdb format (MySQL) to mongoose for testing */
 
 const pg = require('pg');
-var mongoose = require('mongoose');
-var conf = require('./pg.json');
-var Member = require('../models/memberSchema');
+const mongoose = require('mongoose');
+const conf = require('./pg.json');
+const Member = require('../models/memberSchema');
+const TLA = require('../models/tlaSchema');
+const Fuse = require('fuse.js');
+const tlaParse = require('./tlaParser');
 
-/* specify stuff via environment variables
+/* DEPRECATED: specify stuff via environment variables
   PGUSER=uccmemberdb PGHOST=localhost PGPASSWORD=[redacted] PGDATABASE=uccmemberdb_2018 PGPORT=5432 node misc/import_memberdb.js
 */
+
 const pgclient = new pg.Client(conf);
-pgclient.connect();
+console.log("Connecting to memberdb...");
 
-console.log("waiting for pgclient to connect");
+pgclient.connect(function (err) {
+  if (err) {
+    console.warn(err);
+    console.warn("could not connect to memberdb!");
+    process.exit(1);
+  } else {
+    console.log("memberdb connected OK");
+  }
+});
 
+console.log("Connecting to mongodb...");
 mongoose.connect('mongodb://localhost/uccportal-dev'); 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'db connection error:'));
 db.once('open', function() {
-  console.log("Connected to db");
+  console.log("Connected to mongodb.");
+  TLA.remove({}, function (err) {
+    if (err) {
+      console.warn(err);
+    }
+    TLA.insertMany(tlas, function (err) {
+      if (err) {
+        console.warn(err);
+        console.warn("could not update TLAs in database");
+      }
+    });
+  });
   Member.remove({}, function (err) {
-    console.log(err);
+    if (err) {
+      console.log(err);
+      process.exit(1);
+    }
     pgclient.query('SELECT * FROM memberdb_member', processOldMembers);
   });
 });
 
-console.log("waiting for mongoose to open");
+const tlafile = process.argv[2];
+var tlas = tlaParse(tlafile);
 
 /** old memberdb schema from postgresql:
 CREATE TABLE memberdb_member (
@@ -40,9 +68,7 @@ CREATE TABLE memberdb_member (
   student_no character varying(20) NOT NULL,
   date_of_birth date,
   signed_up date DEFAULT '2018-02-23'::date NOT NULL
-);
-*/
-
+); */
 function processOldMembers(err, res) {
   var newMembers = [];
   if (err) {
@@ -51,19 +77,74 @@ function processOldMembers(err, res) {
     console.log("Dumping " + res.rows.length + " rows...");
     for (var i = 0; i < res.rows.length; i++) {
       if (res.rows[i].username) {
-        console.log("user: " + res.rows[i].username);
+        // console.log("user: " + res.rows[i].username);
       } else {
-        console.log("new user: " + res.rows[i].real_name);
+        // console.log("new user: " + res.rows[i].real_name);
       }
       newMembers.push(convertMember(res.rows[i]));
     }
     Member.insertMany(newMembers, function (err, docs) {
-      console.log("Done.");
+      console.log("Done, found " + newMembers.length + " members.");
       pgclient.end();
-      Member.find().exec(verifyMongoMembers);  
+      Member.find({}).exec(verifyMongoMembers);
+      TLA.find({}).exec(function (err, res) {
+        if (err) {
+          console.warn(err);
+        } else {
+          console.log(res.length + " TLAs imported into DB.");
+        }
+      });
     });
   }
 };
+
+function matchTLAs(members) {
+  // clone original TLA array so we can remove TLAs we find and end up with a list of unclaimed TLAs.
+  var tlasUnused = tlas.slice(0);
+
+  // Fuse doesn't like to search across multiple fields so we have to combine firstname and lastname again to make it work.
+  var fixedTLAs = [];
+  for (var i = 0; i < tlas.length; i++) {
+    fixedTLAs.push({
+      name: tlas[i].firstname + " " + tlas[i].lastname,
+      tla: tlas[i].tla,
+    });
+  }
+
+  var options = {
+    shouldSort: true,
+    threshold: 0.3,
+    location: 0,
+    distance: 100,
+    maxPatternLength: 50,
+    minMatchCharLength: 1,
+    keys: [
+      "name"
+    ]
+  };
+  var fuse = new Fuse(fixedTLAs, options); // "list" is the item array
+
+  // now loop through members and find their TLAs
+  for (var mi = 0; mi < members.length; mi++) {
+    var m = members[mi];
+    var results = fuse.search(m.firstname + " " + m.lastname);
+    // console.log("searching for tlas for " + m.firstname + " " + m.lastname);
+    if (results.length > 0) {
+      console.log(m.firstname + " has " + results.length + " tlas, using [" + results[0].tla + "]");
+      // Some false positives: only use the first TLA.
+      m.tlas = [results[0].tla];
+      var usedId = tlasUnused.indexOf(results[0].tla);
+      tlasUnused.splice(usedId, usedId + 1);
+      m.save();
+    }
+    if (results.length == 0) {
+      // console.log(m.firstname + " has no TLA.");
+    }
+  }
+
+  console.log(tlas.length - tlasUnused.length + " TLAs assigned to members, total " + tlas.length + ", unclaimed " + (tlasUnused.length));
+  return members;
+}
 
 function convertMember(row) {
   var renewtype, is_student;
@@ -82,7 +163,7 @@ function convertMember(row) {
       break;
   }
 
-  return {
+  var m = {
     firstname: row.real_name,
     lastname: "",
     is_student: is_student,
@@ -92,13 +173,15 @@ function convertMember(row) {
     phone: row.phone_number,
     birthdate: row.date_of_birth,
     signupdate: row.signed_up,
+    username: row.username,
     renewals: [ { renewtype: renewtype, date: row.signed_up } ],
-    tlas: [ "???" ]
+    tlas: []
   };
+  return m;
 }
 
 function verifyMongoMembers(err, res) {
-  console.log(res[0]);
   console.log("Currently " + res.length + " members in mongodb.");
+  matchTLAs(res);
   db.close();
 }
