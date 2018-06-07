@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-module.exports = function parseTLAs(tlafile) {
+module.exports.parse = function parseTLAs(tlafile) {
   console.log("Loading TLAs from '" + tlafile + "'...");
   var tlas = [];
   try {
@@ -40,15 +40,18 @@ module.exports = function parseTLAs(tlafile) {
       };
       tlas.push(tla);
       console.log(tla.firstname + " / " + tla.lastname + " / " + tla.tla);
-      // process.stdout.write("[" + s[0] + "] " + ((tlas.length % 16 == 0) ? "\n" : ""));
     }
-    // process.stdout.write("\n");
   } catch (err) {
     console.warn("Error parsing TLA data!");
     console.warn(err);
     process.exit(1);
   }
-
-  console.log('Finished parsing TLAs, got ' + tlas.length + ' different TLAs.');
   return tlas;
-}
+};
+
+module.exports.print = function(tlas) {
+  for (var i = 0; i < tlas.length; i++) {
+    process.stdout.write("[" + tlas[i].tla + "] " + ((i % 16 == 15) ? "\n" : ""));
+  }
+  process.stdout.write("\n");
+};

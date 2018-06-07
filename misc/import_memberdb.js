@@ -8,7 +8,7 @@ const conf = require('./pg.json');
 const Member = require('../models/memberSchema');
 const TLA = require('../models/tlaSchema');
 const Fuse = require('fuse.js');
-const tlaParse = require('./tlaParser');
+const tlaParser = require('./tlaParser');
 
 /* DEPRECATED: specify stuff via environment variables
   PGUSER=uccmemberdb PGHOST=localhost PGPASSWORD=[redacted] PGDATABASE=uccmemberdb_2018 PGPORT=5432 node misc/import_memberdb.js
@@ -54,7 +54,9 @@ db.once('open', function() {
 });
 
 const tlafile = process.argv[2];
-var tlas = tlaParse(tlafile);
+var tlas = tlaParser.parse(tlafile);
+tlaParser.print(tlas);
+console.log('Finished parsing TLAs, got ' + tlas.length + ' different TLAs.');
 
 /** old memberdb schema from postgresql:
 CREATE TABLE memberdb_member (
@@ -99,9 +101,6 @@ function processOldMembers(err, res) {
 };
 
 function matchTLAs(members) {
-  // clone original TLA array so we can remove TLAs we find and end up with a list of unclaimed TLAs.
-  var tlasUnused = tlas.slice(0);
-
   // Fuse doesn't like to search across multiple fields so we have to combine firstname and lastname again to make it work.
   var fixedTLAs = [];
   for (var i = 0; i < tlas.length; i++) {
@@ -124,26 +123,61 @@ function matchTLAs(members) {
   };
   var fuse = new Fuse(fixedTLAs, options); // "list" is the item array
 
+  var saved = 0;
+  var toSave = 0;
+
+  function tryCloseDB() {
+    saved += 0.5;
+    if (saved == toSave) {
+      // everything is saved, time to stop.
+      db.close(function (err) {
+        if (err) {
+          console.warn(err);
+          console.warn("could not close mongodb connection!");
+        } else {
+          console.log("closed mongodb connection.");
+        }
+      });
+    }
+  }
+
   // now loop through members and find their TLAs
   for (var mi = 0; mi < members.length; mi++) {
     var m = members[mi];
+
     var results = fuse.search(m.firstname + " " + m.lastname);
     // console.log("searching for tlas for " + m.firstname + " " + m.lastname);
     if (results.length > 0) {
       console.log(m.firstname + " has " + results.length + " tlas, using [" + results[0].tla + "]");
       // Some false positives: only use the first TLA.
       m.tlas = [results[0].tla];
-      var usedId = tlasUnused.indexOf(results[0].tla);
-      tlasUnused.splice(usedId, usedId + 1);
-      m.save();
+
+      // Update Member to include TLAs we found
+      toSave++;
+      m.save(function (err) {
+        // since the saving is done asynchronously, we need to close the db after everything has been saved.
+        if (err) {
+          console.warn("error saving TLA to member!");
+          console.warn(err);
+        }
+        tryCloseDB();
+      });
+
+      // query and update TLA document so we can associate it with a member.
+      TLA.findOneAndUpdate({tla: results[0].tla}, {_memberId: m._id}, function (err, doc) {
+        if (err) {
+          console.warn(err);
+        }
+        console.warn("Updated TLA [" + doc.tla + "] with member ID " + doc._memberId);
+        tryCloseDB();
+      });
     }
     if (results.length == 0) {
       // console.log(m.firstname + " has no TLA.");
     }
   }
 
-  console.log(tlas.length - tlasUnused.length + " TLAs assigned to members, total " + tlas.length + ", unclaimed " + (tlasUnused.length));
-  return members;
+  console.log(toSave + " TLAs assigned to members, total " + tlas.length + ", unclaimed " + (tlas.length - toSave));
 }
 
 function convertMember(row) {
@@ -183,5 +217,4 @@ function convertMember(row) {
 function verifyMongoMembers(err, res) {
   console.log("Currently " + res.length + " members in mongodb.");
   matchTLAs(res);
-  db.close();
 }

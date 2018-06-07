@@ -1,32 +1,38 @@
 #!/usr/bin/env node
 
-/** Module dependencies. */
-var app = require('../app');
-var debug = require('debug')('uccportal:server');
-var http = require('http');
-var mongoose = require('mongoose');
+/**
+ * Module dependencies.
+ */
 
-/** Get port from environment and store in Express. */
+var app = require('../app');
+var debug = require('debug')('login:server');
+var http = require('http');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
-/** Create HTTP server. */
+/**
+ * Create HTTP server.
+ */
+
 var server = http.createServer(app);
 
-/** Listen on provided port, on all network interfaces. */
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
 server.listen(port);
-server.on('error', onHTTPError);
-server.on('listening', onHTTPListening);
+server.on('error', onError);
+server.on('listening', onListening);
 
-/** Connect to mongodb */
-mongoose.connect('mongodb://localhost/uccportal-dev'); 
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'db connection error:'));
-db.once('open', function() {
-  console.log("Connected to db");
-});
+/**
+ * Normalize a port into a number, string, or false.
+ */
 
-/** Normalize a port into a number, string, or false. */
 function normalizePort(val) {
   var port = parseInt(val, 10);
 
@@ -43,8 +49,11 @@ function normalizePort(val) {
   return false;
 }
 
-/** Event listener for HTTP server "error" event. */
-function onHTTPError(error) {
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
   if (error.syscall !== 'listen') {
     throw error;
   }
@@ -68,8 +77,11 @@ function onHTTPError(error) {
   }
 }
 
-/** Event listener for HTTP server "listening" event. */
-function onHTTPListening() {
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr

@@ -1,6 +1,11 @@
 'use strict';
 const mongoose = require('mongoose');
 
+var renewalSchema = mongoose.Schema({
+  renewtype: {type: String },
+  date: { type: Date },
+})
+
 // Here we define the schema used by the model for gumby documents
 var memberSchema = mongoose.Schema({
   firstname: String,
@@ -12,9 +17,9 @@ var memberSchema = mongoose.Schema({
   phone: String,
   birthdate: Date,
   username: String,
-  tlas: [String],
+  tlas: [ { type: String } ],
   signupdate: Date,
-  renewals: [{renewtype: String, date: Date}]
+  renewals: [ { type: renewalSchema } ]
 });
 
 // And we export (return) a model based on the schema
