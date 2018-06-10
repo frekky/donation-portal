@@ -90,9 +90,14 @@ module.exports = function main(){
         var spawnOpts = {
             stdio:"inherit", uid:config.serviceUid, gid:config.serviceGid
         };
-        cproc.spawn(nodejs, ["core/pam-service.js"], spawnOpts);
+        var rootSpawnOpts = {stdio:"inherit", gid:config.serviceGid};
+        cproc.spawn(nodejs, ["core/pam-service.js"], rootSpawnOpts);
         cproc.spawn(nodejs, ["core/proxy-service.js"], spawnOpts);
         cproc.spawn(nodejs, ["core/login-service.js"], spawnOpts);
+
+        // Drop privileges
+        process.setgid(config.serviceGid);
+        process.setuid(config.serviceUid);
     }
     catch(e){
         //console.error("Fatal Error: " + e.message);

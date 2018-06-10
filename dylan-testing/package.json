@@ -1,7 +1,7 @@
 {
   "name": "ucc-portal",
   "version": "0.0.1",
-  "description": "An easy to use self-service portal for UCC members to configure their shell, mail forwarding address, and other things that would normally require knowledge of the Linux command line.",
+  "description": "An easy to use self-service portal for UCC members to check their dispense credit, configure mail forwarding address, and other things that would normally require knowledge of the Linux command line.",
   "main": "uccportal.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

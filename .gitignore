@@ -67,3 +67,7 @@ typings/
 
 # next.js build output
 .next
+
+# Ignore temporary backup files created by vim
+*~
+.swp
