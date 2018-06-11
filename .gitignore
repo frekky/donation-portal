@@ -70,4 +70,4 @@ typings/
 
 # Ignore temporary backup files created by vim
 *~
-.swp
+*.swp

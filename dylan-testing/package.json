@@ -11,5 +11,8 @@
     "url": "https://gitlab.ucc.asn.au/frekk/uccportal.git"
   },
   "author": "dylanh333; frekk",
-  "license": "GPL-3.0"
+  "license": "GPL-3.0",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
 }
