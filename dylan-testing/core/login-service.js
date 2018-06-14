@@ -1,3 +1,5 @@
+"use strict";
+
 var express = require("express");
 var http = require("http");
 var fs = require("fs");
@@ -13,7 +15,6 @@ app.get("/", function(req, res){
     res.end();
 });
 
-// Create server, start it, and make sure it gracefully shuts down
-// when this service gets terminated
+// Create server and listening socket, then set appropriate perms on socket
 server = httpSockets.createServer(app);
 server.listen(config.varPath + "/login-service.sock");

@@ -1,3 +1,5 @@
+"use strict";
+
 function getConfig(){
     var config;
 
