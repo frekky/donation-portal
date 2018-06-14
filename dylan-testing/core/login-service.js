@@ -1,19 +1,19 @@
 var express = require("express");
+var http = require("http");
 var fs = require("fs");
 
-var config;
-var app;
+var httpSockets = require("common/http-sockets");
+var config = require("common/config");
+var app = express();
+var server;
 
-function main(){
-    // Read in config from environment
-    config = JSON.parse(process.env.UCCPORTAL_CONFIG);
-    
-    app = express();
-    app.get("/", function(req, res){
-        res.write("Hello World!");
-        res.end();
-    });
+// Set up routes
+app.get("/", function(req, res){
+    res.write("Hello World!");
+    res.end();
+});
 
-    app.listen(config.varPath + "/login-service.sock");
-}
-main();
+// Create server, start it, and make sure it gracefully shuts down
+// when this service gets terminated
+server = httpSockets.createServer(app);
+server.listen(config.varPath + "/login-service.sock");

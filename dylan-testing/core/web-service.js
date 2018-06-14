@@ -1,8 +1,8 @@
 var express = require("express");
 var http = require("http");
 var fs = require("fs");
-var config = require("common/config.js");
-var socketProxy = require("common/socket-proxy.js");
+var config = require("common/config");
+var httpSockets = require("common/http-sockets");
 
 var config;
 var app;
@@ -10,7 +10,7 @@ var app;
 function main(){
     // Set up express app and routes
     app = express();
-    app.use("/login", socketProxy(config.varPath + "/login-service.sock"));
+    app.use("/login", httpSockets.proxy(config.varPath + "/login-service.sock"));
 
     // Start web server or crash
     console.info(
