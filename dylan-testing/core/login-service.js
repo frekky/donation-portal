@@ -7,9 +7,14 @@ var qstring = require("querystring");
 var express = require("express");
 
 var hsocks = require("common/http-sockets");
+var sudo = require("common/sudo");
 var config = require("common/config");
 
-function testCredentials(username, password, callback){    
+
+// TODO: replace with sudo implementation
+// This is a stub that will likely just be replaced with
+// a call to the sudo function
+function testCredentials(username, password, callback){ 
     // Validate input
     if(
         typeof username != "string" || !username
