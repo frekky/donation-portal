@@ -1,0 +1,19 @@
+{
+  "name": "ucc-portal",
+  "version": "0.0.1",
+  "description": "An easy to use self-service portal for UCC members to check their dispense credit, configure mail forwarding address, and other things that would normally require knowledge of the Linux command line.",
+  "main": "uccportal.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.ucc.asn.au/frekk/uccportal.git"
+  },
+  "author": "dylanh333; frekk",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "express": "^4.16.3",
+    "mongoose": "^5.1.7"
+  }
+}
