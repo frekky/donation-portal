@@ -1,7 +1,0 @@
-{
-	"configPath":"/etc/uccportal/config.json",
-	"varPath":"/var/lib/uccportal",
-    "user":"uccportal",
-    "host":"0.0.0.0",
-    "port":8080
-}
