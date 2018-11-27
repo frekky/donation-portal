@@ -6,6 +6,9 @@
 .db/
 misc/pg.json
 
+# local virtalenv
+env/
+
 # Logs
 logs
 *.log
