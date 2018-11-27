@@ -2,23 +2,21 @@
 Django settings for UCC Gumby Management System (GMS) project.
 
 For more information on this file, see
-https://docs.djangoproject.com/en/1.7/topics/settings/
+https://docs.djangoproject.com/en/2.1/topics/settings/
 
 For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.7/ref/settings/
+https://docs.djangoproject.com/en/2.1/ref/settings/
 """
-
-# import local settings
-from gms.settings_local import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+# import local settings
+from gms.settings_local import *
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-
-ALLOWED_HOSTS = ['secure.ucc.asn.au',]
 
 # Application definition
 
@@ -32,15 +30,14 @@ INSTALLED_APPS = (
     'memberdb',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
+]
 
 ROOT_URLCONF = 'gms.urls'
 
@@ -68,10 +65,10 @@ USE_TZ = True
 STATIC_URL = '/members/media/'
 STATIC_ROOT = '/services/gms/static'
 
-AUTHENTICATION_BACKENDS = (
+AUTHENTICATION_BACKENDS = [
     'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
-)
+]
 
 import ldap
 from django_auth_ldap.config import LDAPSearch, PosixGroupType

@@ -5,6 +5,7 @@ DEBUG = True
 ADMINS = (
     ('UCC Committee', 'committee-only@ucc.asn.au'),
     ('David Adam', 'zanchey@ucc.gu.uwa.edu.au'),
+    ('Felix von Perger', 'frekk@ucc.asn.au'),
 )
 
 DATABASES = {
@@ -21,4 +22,4 @@ DATABASES = {
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'oB8fVqxJPfeL0MomVCwExU13H3ajZd9vWFgCpL5RMuhR4JOqSXemYasppIdimhLk'
 
-ALLOWED_HOSTS = ['secure.ucc.asn.au']
+ALLOWED_HOSTS = []
