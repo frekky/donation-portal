@@ -41,6 +41,17 @@ Eventual / Conceptual Workflow Design
     4. Renewing member gets email confirming payment / renewal success
         - confirmation link to reactivate account? should this happen between steps 1-2?
 
+Environment Setup
+-----------------
+
+- Install `python-virtualenv`
+- `git clone https://gitlab.ucc.asn.au/frekk/uccportal uccportal`
+- `cd uccportal`
+- `virtualenv env`
+- Every time you want to do some uccportal development, do `source env/bin/activate` to set up your environment
+- install python dependencies to local environment: `pip install -r pip-packages.txt`
+- Run the local development server with `gms/manage.py runserver`
+
 -----------------------------------------------------------
 
 GMS - The Gumby Management System [DEPRECATED]
