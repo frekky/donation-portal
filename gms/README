@@ -1,0 +1,49 @@
+GMS - The Gumby Management System
+=================================
+Written by David Adam <zanchey@ucc.gu.uwa.edu.au>
+Derived from MemberDB by Danni Madeley
+
+GETTING STARTED EACH YEAR
+=========================
+
+To set up a new database,
+
+(as root on mussel)
+
+mussel:~# su - postgres
+postgres@mussel:~$ psql
+postgres=# create database uccmemberdb_20XX;
+postgres=# GRANT ALL on DATABASE uccmemberdb_20XX to uccmemberdb;
+
+Adjust /services/gms/gms/settings_local.py to point to the new database (usually
+changing the databse name is enough).
+
+If you want to make changes to the data you collect, now is the time to do it.
+
+Edit /service/gms/memberdb/models.py
+In /services/gms, run `python manage.py makemigrations` to prepare the databae
+updates.
+
+mussel:~# cd /services/gms/
+mussel:/services/gms# python manage.py validate
+0 errors found
+mussel:/services/gms# python manage.py syncdb
+...
+You just installed Django's auth system, which means you don't have any
+ superusers defined.
+Would you like to create one now? (yes/no): no
+
+Now restart MemberDB by runing
+mussel:/services/gms# touch gms/wsgi.wsgi
+
+Now go ahead and log in to the website. It will be totally fresh, with all
+committee members being made superusers on first login.
+
+If you would like to allow non-committee users to help out with data entry,
+ask them to log in. After the login attempt is denied, you will be able to
+find their name in the Auth/Users area of the site. Turn on their staff status
+and allow them access to the memberdb permissions.
+
+A CSV download function has been added - select the members you want to
+download in the administration interface, then choose Download as CSV file
+from the Actions menu.
