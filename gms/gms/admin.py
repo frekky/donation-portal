@@ -1,12 +1,36 @@
 import csv
 from collections import OrderedDict
-from functools import wraps
+from functools import wraps, singledispatch
 
-from django.db.models import FieldDoesNotExist
+from django.contrib import admin
 from django.http import HttpResponse
+from django.db.models import FieldDoesNotExist
 
-from functools import singledispatch  # included in Python 3.4+
+from memberdb.models import Member, IncAssocMember, Membership
+from memberdb.actions import download_as_csv 
 
+"""
+Customise the administrative interface for modifying Member records
+"""
+class MemberAdmin(admin.ModelAdmin):
+    list_display = ['first_name', 'last_name', 'display_name', 'username']
+    list_filter = ['is_guild', 'is_student']
+    search_fields = list_display
+    actions = [download_as_csv]
+
+admin.site.register(Member, MemberAdmin)
+
+# Register the other models with default admin site pages
+admin.site.register(IncAssocMember)
+admin.site.register(Membership)
+
+# Customise the admin site
+admin.site.site_header = "Gumby Management System"
+admin.site.site_title = "UCC Gumby Management System"
+admin.site.index_title = "Membership Database"
+
+
+# see download as CSV stuff below
 def prep_field(obj, field):
     """
     (for download_as_csv action)
