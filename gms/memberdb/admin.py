@@ -7,28 +7,6 @@ from django.http import HttpResponse
 from django.db.models import FieldDoesNotExist
 
 from memberdb.models import Member, IncAssocMember, Membership
-from memberdb.actions import download_as_csv 
-
-"""
-Customise the administrative interface for modifying Member records
-"""
-class MemberAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'display_name', 'username']
-    list_filter = ['is_guild', 'is_student']
-    search_fields = list_display
-    actions = [download_as_csv]
-
-admin.site.register(Member, MemberAdmin)
-
-# Register the other models with default admin site pages
-admin.site.register(IncAssocMember)
-admin.site.register(Membership)
-
-# Customise the admin site
-admin.site.site_header = "Gumby Management System"
-admin.site.site_title = "UCC Gumby Management System"
-admin.site.index_title = "Membership Database"
-
 
 # see download as CSV stuff below
 def prep_field(obj, field):
@@ -147,3 +125,32 @@ def _(description):
     wrapped_action.short_description = description
     return wrapped_action
 
+
+"""
+Customise the administrative interface for modifying Member records
+"""
+class IAMemberAdmin(admin.ModelAdmin):
+    list_display = ['first_name', 'last_name', 'email_address']
+    search_fields = list_display
+    readonly_fields = ['updated', 'created']
+    actions = [download_as_csv]
+    
+class MemberAdmin(IAMemberAdmin):
+    list_display = ['first_name', 'last_name', 'display_name', 'username']
+    list_filter = ['is_guild', 'is_student']
+    readonly_fields = ['member_updated', 'updated', 'created']
+    search_fields = list_display
+
+class MembershipAdmin(admin.ModelAdmin):
+    readonly_fields = ['date_submitted']
+
+
+# Register the other models with either default admin site pages or with optional customisations
+admin.site.register(Member, MemberAdmin)
+admin.site.register(Membership, MembershipAdmin)
+admin.site.register(IncAssocMember, IAMemberAdmin)
+
+# Customise the admin site
+admin.site.site_header = "Gumby Management System"
+admin.site.site_title = "UCC Gumby Management System"
+admin.site.index_title = "Membership Database"
