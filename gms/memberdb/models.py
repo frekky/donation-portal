@@ -27,11 +27,10 @@ class IncAssocMember (models.Model):
     first_name      = models.CharField ('First name', max_length=200)
     last_name       = models.CharField ('Surname', max_length=200)
     email_address   = models.EmailField ('Email address', blank=True)
-    updated         = models.DateField ('Last updated', auto_now=True)
-    created         = models.DateField ('When created', auto_now_add=True)
-    def __unicode__ (self):
+    updated         = models.DateTimeField ('IncA. info last updated', auto_now=True)
+    created         = models.DateTimeField ('When created', auto_now_add=True)
+    def __str__ (self):
         return "%s %s <%s>" % (self.first_name, self.last_name, self.email_address)
-
 
 """
 Member table: only latest information, one record per member
@@ -46,8 +45,8 @@ class Member (IncAssocMember):
     is_student      = models.BooleanField ('Student at UWA', default=True, blank=True)
     is_guild        = models.BooleanField ('UWA Guild member', default=True, blank=True)
     id_number       = models.CharField ('Student number or Drivers License', max_length=50 , blank=False)
-    member_updated  = models.DateField ('Last updated', auto_now=True)
-    def __unicode__ (self):
+    member_updated  = models.DateTimeField ('Other info last updated', auto_now=True)
+    def __str__ (self):
         if (self.display_name != "%s %s" % (self.first_name, self.last_name)):
             name = "%s (%s %s)" % (self.display_name, self.first_name, self.last_name)
         else:
@@ -59,9 +58,11 @@ Membership table: store information related to individual (successful/accepted) 
 """
 class Membership (models.Model):
     member          = models.ForeignKey (Member, on_delete=models.CASCADE)
-    membership_type = models.CharField ('Membership type', max_length=10, blank=False, null=True)
-    payment_method  = models.CharField ('Payment method', max_length=10, choices=PAYMENT_METHODS)
+    membership_type = models.CharField ('Membership type', max_length=10, blank=False, null=True, choices=MEMBERSHIP_TYPES)
+    payment_method  = models.CharField ('Payment method', max_length=10, choices=PAYMENT_METHODS, blank=True)
     accepted        = models.BooleanField ('Membership approved', default=False)
     date_submitted  = models.DateTimeField ('Date signed up', auto_now_add=True)
     date_paid       = models.DateTimeField ('Date of payment', blank=True, null=True)
     date_accepted   = models.DateTimeField ('Date approved', blank=True, null=True)
+    def __str__ (self):
+        return "%s" % (self.member.display_name);
