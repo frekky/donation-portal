@@ -6,7 +6,7 @@
 {% if member_list %}
     <ul>
     {% for m in member_list %}
-        <li><a href="{% url 'memberdb:info' m.username %}">{{ m.display_name }}</a></li>
+        <li><a href="{% url 'memberdb:info' m.username %}"><strong>[{{ m.username }}]</strong> {{ m.display_name }}</a></li>
     {% endfor %}
     </ul>
 {% else %}

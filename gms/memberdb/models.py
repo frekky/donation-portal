@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import RegexValidator
 import datetime
 
 MEMBERSHIP_TYPES = [
@@ -39,16 +40,19 @@ Note: Privacy laws are a thing, unless people allow it then we cannot provide th
 """
 class Member (IncAssocMember):
     display_name    = models.CharField ('Display name', max_length=200)
-    username        = models.CharField ('Username', max_length=32, blank=False, unique=True)
-    phone_number    = models.CharField ('Phone number', max_length=14, blank=False)
-    date_of_birth   = models.DateField ('Date of birth', blank=False)
+    username        = models.SlugField ('Username', max_length=32, blank=False, unique=True, validators=[RegexValidator(regex='^[a-z0-9._-]+$')])
+    phone_number    = models.CharField ('Phone number', max_length=20, blank=False, validators=[RegexValidator(regex='^\+?[0-9() -]+$')])
     last_renew      = models.DateField ('Last renewal', blank=True, null=True)
-    is_student      = models.BooleanField ('Student at UWA', default=True)
-    is_guild        = models.BooleanField ('UWA Guild member', default=True)
+    is_student      = models.BooleanField ('Student at UWA', default=True, blank=True)
+    is_guild        = models.BooleanField ('UWA Guild member', default=True, blank=True)
     id_number       = models.CharField ('Student number or Drivers License', max_length=50 , blank=False)
     member_updated  = models.DateField ('Last updated', auto_now=True)
     def __unicode__ (self):
-        return "[%s] %s (%s %s)" % (self.username, self.display_name, self.first_name, self.last_name)
+        if (self.display_name != "%s %s" % (self.first_name, self.last_name)):
+            name = "%s (%s %s)" % (self.display_name, self.first_name, self.last_name)
+        else:
+            name = self.display_name
+        return "[%s] %s" % (self.username, name)
 
 """
 Membership table: store information related to individual (successful/accepted) signups/renewals
@@ -60,4 +64,4 @@ class Membership (models.Model):
     accepted        = models.BooleanField ('Membership approved', default=False)
     date_submitted  = models.DateTimeField ('Date signed up', auto_now_add=True)
     date_paid       = models.DateTimeField ('Date of payment', blank=True, null=True)
-    date_accepted   = models.DateTimeField ('Date accepted', blank=True, null=True)
+    date_accepted   = models.DateTimeField ('Date approved', blank=True, null=True)
