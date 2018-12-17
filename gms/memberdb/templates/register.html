@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Register a New Gumby into the System{% endblock %}
+
+{% block content %}
+<div class="modal"></div>
+<div class="form-container centered">
+    <form action="{% url 'memberdb:register' %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <p><input type="submit" value="Register"></p>
+    </form>
+</div>
+{% endblock %}
