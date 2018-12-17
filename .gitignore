@@ -1,3 +1,6 @@
+gms/static
+**settings_local.py
+
 # VS Code metadata
 .vscode
 .vscode/**
@@ -5,6 +8,9 @@
 # local testing database stuff
 .db/
 misc/pg.json
+
+# local virtalenv
+env/
 
 # Logs
 logs
@@ -67,3 +73,9 @@ typings/
 
 # next.js build output
 .next
+
+# Ignore temporary backup files created by vim
+*~
+*.swp
+
+*.pyc

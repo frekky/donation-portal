@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Gumbies registered in the system{% endblock %}
+
+{% block content %}
+{% if member_list %}
+    <ul>
+    {% for m in member_list %}
+        <li><a href="{% url 'memberdb:info' m.username %}"><strong>[{{ m.username }}]</strong> {{ m.display_name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No members are registered :(</p>
+{% endif %}
+{% endblock %}
