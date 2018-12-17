@@ -40,9 +40,9 @@ Note: Privacy laws are a thing, unless people allow it then we cannot provide th
 class Member (IncAssocMember):
     display_name    = models.CharField ('Display name', max_length=200)
     username        = models.CharField ('Username', max_length=32, blank=False, unique=True)
-    phone_number    = models.CharField ('Phone number', max_length=14, blank=True)
-    date_of_birth   = models.DateField ('Date of birth', blank=True)
-    last_renew      = models.DateField ('Last renewal', blank=False)
+    phone_number    = models.CharField ('Phone number', max_length=14, blank=False)
+    date_of_birth   = models.DateField ('Date of birth', blank=False)
+    last_renew      = models.DateField ('Last renewal', blank=True, null=True)
     is_student      = models.BooleanField ('Student at UWA', default=True)
     is_guild        = models.BooleanField ('UWA Guild member', default=True)
     id_number       = models.CharField ('Student number or Drivers License', max_length=50 , blank=False)
