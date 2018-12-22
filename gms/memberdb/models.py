@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models import F
 from django.core.validators import RegexValidator
-import datetime
 
 """
 dictionary of membership types & descriptions, should be updated if these are changed in dispense.
@@ -116,11 +115,11 @@ Membership table: store information related to individual (successful/accepted) 
 """
 class Membership (models.Model):
     member          = models.ForeignKey (Member, on_delete=models.CASCADE, related_name='memberships')
-    membership_type = models.CharField ('Membership type', max_length=10, blank=False, null=True, choices=MEMBERSHIP_TYPES)
-    payment_method  = models.CharField ('Payment method', max_length=10, blank=False, null=True, choices=PAYMENT_METHODS)
+    membership_type = models.CharField ('Membership type', max_length=10, blank=True, null=False, choices=MEMBERSHIP_TYPES)
+    payment_method  = models.CharField ('Payment method', max_length=10, blank=True, null=True, choices=PAYMENT_METHODS, default=None)
     approved        = models.BooleanField ('Membership approved', default=False)
     approver        = models.ForeignKey (Member, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_memberships')
-    date_submitted  = models.DateTimeField ('Date signed up', auto_now_add=True)
+    date_submitted  = models.DateTimeField ('Date signed up')
     date_paid       = models.DateTimeField ('Date of payment', blank=True, null=True)
     date_approved   = models.DateTimeField ('Date approved', blank=True, null=True)
 
@@ -129,4 +128,4 @@ class Membership (models.Model):
 
     class Meta:
         verbose_name = "Membership renewal record"
-        ordering = ['-approved', 'member__username', '-date_submitted']
+        ordering = ['approved', '-date_submitted']
