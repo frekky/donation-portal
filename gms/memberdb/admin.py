@@ -11,6 +11,10 @@ from memberdb.models import Member, IncAssocMember, Membership
 from memberdb.actions import download_as_csv
 from memberdb.approve import MembershipApprovalForm, MembershipApprovalAdminView
 
+
+def get_model_url(pk, model_name):
+    return reverse('admin:memberdb_%s_change' % model_name, args=[pk])
+
 """
 helper mixin to make the admin page display only "View" rather than "Change" or "Add"
 """
@@ -37,10 +41,15 @@ Define the administrative interface for viewing member details required under th
 class IAMemberAdmin(ButtonActionModelAdmin, ReadOnlyModelAdmin):
     readonly_fields = ['__str__', 'updated', 'created']
     fields = ['first_name', 'last_name', 'email_address', 'updated', 'created']
-    search_fields = readonly_fields
+    search_fields = ['first_name', 'last_name', 'email_address']
     list_display = readonly_fields
     actions = [download_as_csv]
 
+    # add a "go to member" URL into the template context data
+    def change_view(self, request, object_id, form_url='', extra_context={}):
+        extra_context['member_edit_url'] = get_model_url(object_id, 'member')
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
+        
 class MembershipInline(admin.TabularInline):
     model = Membership
     readonly_fields = ['member', 'date_submitted']
@@ -56,8 +65,10 @@ class MemberAdmin(ButtonActionModelAdmin):
     actions = [download_as_csv]
     inlines = [MembershipInline]
 
-def get_model_url(pk, model_name):
-    return reverse('admin:memberdb_%s_change' % model_name, args=[pk])
+    # add a "go to member" URL into the template context data
+    def change_view(self, request, object_id, form_url='', extra_context={}):
+        extra_context['incassocmember_url'] = get_model_url(object_id, 'incassocmember')
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
 """
 Define the admin page for viewing normal Member records (all details included) and approving them
