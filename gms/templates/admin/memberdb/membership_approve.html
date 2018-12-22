@@ -4,7 +4,12 @@
 {% block content %}
 
 <div id="content-main">
-
+<h1>Approve membership for <i>{{ member.first_name }} {{ member.last_name }}</i></h1>
+{% if show_member_summary %}
+<div class="member-summary">
+{% include "admin/memberdb/membership_summary.html" %}
+</div>
+{% endif %}
 <form action="" method="POST">
     {% csrf_token %}
 

@@ -1,8 +1,15 @@
-{% extends "admin/base.html" %}
+{# memberdb: add branding to admin site #}
+{% extends "admin/base_site.html" %}
+{% load static %}
 
 {% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "shared.css" %}">
+{% endblock %}
+
 {% block branding %}
+<div class="logo"></div>
 <h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
 {% endblock %}
 

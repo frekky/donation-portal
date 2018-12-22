@@ -1,0 +1,18 @@
+#site-name {
+    display: inline-block;
+}
+
+.logo {
+    display: inline-block;
+    margin: 10px;
+    height: 44px;
+    width: 44px;
+    background-image: url("ucc-logo-white.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#content-related.wide {
+    width: 400px;
+    margin-right: -440px;
+}

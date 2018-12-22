@@ -1,4 +1,5 @@
 {% load static %}
+{% block member-summary %}
 <table class="ms-summary">
     <tr class="{% cycle 'row1' 'row2' as rcl %}">
         <th>Real name</th>
@@ -35,3 +36,4 @@
         <td>{% if member.id_number %}{{ member.id_number }}{% else %}<i>not provided</i>{% endif %}</td>
     </tr>
 </table>
+{% endblock %}

@@ -1,17 +1,9 @@
-{% extends "admin/base_site.html" %}
+{# memberdb: custom template extension for admin homepage #}
+{% extends "admin/index.html" %}
 {% load i18n static %}
-
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">{% endblock %}
-
-{% block coltype %}colMS{% endblock %}
-
-{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
-
-{% block breadcrumbs %}{% endblock %}
 
 {% block content %}
 <div id="content-main">
-
 {% if app_list %}
     {% for app in app_list %}
     {% if app.app_label == "memberdb" %}
@@ -113,7 +105,7 @@
 {% endblock %}
 
 {% block sidebar %}
-<div id="content-related">
+<div id="content-related" class="wide">
     <div class="module" id="help-module">
         <h2>Help for door members</h2>
         <h3>Adding members</h3>
