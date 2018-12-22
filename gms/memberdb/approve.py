@@ -5,18 +5,32 @@ See ../../README.md for details
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from django.views.generic.edit import FormView, UpdateView
-from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.edit import UpdateView
+from django.utils import timezone
 from django import forms
 
 from memberdb.models import Member, Membership, MEMBERSHIP_TYPES_
 
 def get_membership_type(member):
     best = None
-    is_fresh = member.memberships.all()
-    breakpoint()
+    is_fresh = member.memberships.all().count() == 0
     for t in MEMBERSHIP_TYPES_:
-        pass
+        if (t['must_be_fresh'] == is_fresh):
+            best = t
+            break
+        elif (t['is_student'] == member.is_student and t['is_guild'] == member.is_guild):
+            best = t
+            break
+    if (best is None):
+        return MEMBERSHIP_TYPES_[0]['dispense']
+    else:
+        return best['dispense']
+
+def make_pending_membership(member):
+    ms = Membership(member=member, approved=False)
+    ms.date_submitted = timezone.now()
+    ms.membership_type = get_membership_type(member)
+    return ms
 
 """
 inline admin change list action buttons
@@ -24,8 +38,7 @@ see https://medium.com/@hakibenita/how-to-add-custom-action-buttons-to-django-ad
 and have a look at .admin.MembershipAdmin
 """
 class MembershipApprovalForm(forms.ModelForm):
-    payment_amount  = forms.DecimalField(label='Amount paid (AUD)', decimal_places=2, min_value=0)
-    payment_confirm = forms.BooleanField(label='Confirm payment', required=True)
+    payment_confirm = forms.BooleanField(label='Confirm payment', required=False)
     
     # this must be passed by kwargs upon instantiating the form
     request = None
@@ -50,11 +63,26 @@ class MembershipApprovalForm(forms.ModelForm):
     def clean(self):
         # get the cleaned data from the form API and do something with it
         data = super().clean()
-        breakpoint()
+        now = timezone.now()
+        #breakpoint()
         # find a Member matching our current username
-        qs_approver = Member.objects.filter(username__exact=self.request.user.username).first()
-        if (qs_approver == None):
-            self.add_error(None, 'cannot set approver: no Member record with username %s' % self.request.user.username)
+        approver = Member.objects.filter(username__exact=self.request.user.username).first()
+        if (approver == None):
+            self.add_error(None, 'Cannot set approver: no Member record with username %s' % self.request.user.username)
+        data['approver'] = approver
+        data['approved'] = True
+        data['date_approved'] = now
+
+        if (data['payment_confirm'] == True):
+            data['date_paid'] = now
+        
+        # make sure "no payment" is recorded for Life Members.
+        # XXX this might not actually be the case, since some life members may want to also be financial members (ie. for constitutional voting rights)
+        #     and so this is probably more annoying than helpful
+        if (data['membership_type'] == ''):
+            if (data['payment_method'] != ''):
+                self.add_error('payment_method', 'Life members shall not pay membership fees!')
+            data['payment_method'] = ''
 
         return data
 
@@ -63,6 +91,14 @@ class MembershipApprovalForm(forms.ModelForm):
     """
     def save(self, commit=True):
         ms = super().save(commit=False)
+
+        # copy attributes not specified in fields
+        ms.approver = self.cleaned_data['approver']
+        ms.approved = self.cleaned_data['approved']
+        ms.date_approved = self.cleaned_data['date_approved']
+        ms.date_paid = self.cleaned_data['date_paid']
+
+        # do something
         if (commit):
             ms.save()
         return ms
@@ -77,11 +113,14 @@ class MembershipApprovalAdminView(UpdateView):
     object = None
 
     def get_context_data(self, **kwargs):
+        ms = self.get_object()
         context = super().get_context_data(**kwargs)
         context.update(self.admin.admin_site.each_context(self.request))
         context.update({
             'opts': self.admin.model._meta,
-            'member': self.get_object()
+            'ms': ms,
+            'member': ms.member,
+            'show_member_summary': True,
         })
         return context
 
@@ -94,6 +133,7 @@ class MembershipApprovalAdminView(UpdateView):
     called when the approval form is submitted and valid data (according to the form's field types and defined validators) is given
     """
     def form_valid(self, form):
+        breakpoint()
         ms = form.save()
         
         self.admin.message_user(self.request, 'Approve success')
