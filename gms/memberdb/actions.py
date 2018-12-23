@@ -8,7 +8,7 @@ from django.http import HttpResponse
 def prep_field(obj, field):
     """
     (for download_as_csv action)
-    Returns the field as a unicode string. If the field is a callable, it
+    Returns the field as a (unicode) string. If the field is a callable, it
     attempts to call it first, without arguments.
     """
     if '__' in field:
@@ -23,7 +23,7 @@ def prep_field(obj, field):
 
     attr = getattr(obj, field)
     output = attr() if callable(attr) else attr
-    return unicode(output).encode('utf-8') if output is not None else ""
+    return str(output) if output is not None else ""
 
 
 @singledispatch
@@ -53,7 +53,7 @@ def download_as_csv(modeladmin, request, queryset):
 
     def fname(field):
         if verbose_names:
-            return unicode(field.verbose_name).capitalize()
+            return str(field.verbose_name).capitalize()
         else:
             return field.name
 
@@ -81,7 +81,7 @@ def download_as_csv(modeladmin, request, queryset):
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (
-            unicode(opts).replace('.', '_')
+            str(opts).replace('.', '_')
         )
 
     writer = csv.writer(response)
