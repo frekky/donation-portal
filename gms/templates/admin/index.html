@@ -118,8 +118,13 @@
         <p>
             So that memberdb data can be reused from year to year, member details are kept separately
             from the records of membership renewals. For a member to be considered active, a membership
-            record linked to that member must be marked as approved and been submitted during the current
-            committee year.
+            record linked to that member must have been submitted during the current year and approved.
+        </p>
+        <h3>Approving pending memberships</h3>
+        <p>
+            When new members <a href="{% url 'memberdb:register' %}">register</a> or existing members
+            <a href="{% url 'memberdb:renew' %}">renew</a>, a pending membership record is created for that member.
+            
         </p>
     </div>
     <div class="module" id="recent-actions-module">

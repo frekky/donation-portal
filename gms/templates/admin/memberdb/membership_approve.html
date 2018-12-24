@@ -6,7 +6,7 @@
 <div id="content-main">
 <h1>Approve membership for <i>{{ member.first_name }} {{ member.last_name }}</i></h1>
 {% if show_member_summary %}
-<div class="member-summary">
+<div class="ms-approve-summary">
 {% include "admin/memberdb/membership_summary.html" %}
 </div>
 {% endif %}
@@ -35,7 +35,7 @@
       {% endfor %}
     </fieldset>
     <div class="submit-row">
-        <input type="submit" class="default" value="Submit">
+        <input type="submit" class="default" value="Save &amp; Approve">
     </div>
 </form>
 </div>
