@@ -6,6 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic.edit import CreateView, UpdateView
+from django.utils.safestring import mark_safe
 from django import forms
 
 from .models import Member, Membership
@@ -18,12 +19,15 @@ and https://docs.djangoproject.com/en/2.1/ref/forms/fields/#error-messages
 """
 class RegisterForm(forms.ModelForm):
     confirm_email   = forms.EmailField(label='Confirm your email address', required=False)
-    agree_tnc       = forms.BooleanField(label='I agree to the terms & conditions', required=True)
+    agree_tnc       = forms.BooleanField(label='I agree to the terms & conditions', required=True, help_text=mark_safe(
+        "You, by completing this form, agree to abide by the UCC Constitution, rulings of the UCC Committee, UCC and "
+        "UWA’s Network Usage Guidelines and that you will be subscribed to the UCC Mailing List. <br>"
+        'Policies can be found <a href="https://www.ucc.asn.au/infobase/policies.ucc">here</a>.'))
     #membership_type = forms.ChoiceField(label='Select your membership type', required=True, choices=MEMBERSHIP_TYPES)
 
     class Meta:
         model = Member
-        fields = ['first_name', 'last_name', 'username', 'phone_number', 'is_student', 'is_guild', 'email_address']
+        fields = ['first_name', 'last_name', 'username', 'phone_number', 'is_student', 'is_guild', 'id_number', 'email_address']
         error_messages = {
             'username': {
                 'unique': 'This username is already in use, please pick another one.',

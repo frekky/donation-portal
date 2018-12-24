@@ -3,12 +3,32 @@
 {% block title %}Register a New Gumby into the System{% endblock %}
 
 {% block content %}
-<div class="modal"></div>
-<div class="form-container centered">
+<div class="form-container">
     <form action="{% url 'memberdb:register' %}" method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <p><input type="submit" value="Register"></p>
+    
+        {% if form.non_field_errors|length > 0 %}
+            <p class="errornote">
+                Please correct the errors below.
+            </p>
+            {{ form.non_field_errors }}
+        {% endif %}
+
+        {% for field in form %}
+        <div class="form-row">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.field.help_text %}
+            <p class="help">
+            {{ field.field.help_text|safe }}
+            </p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div class="submit-row">
+            <input type="submit" class="default" value="Register">
+        </div>
     </form>
 </div>
 {% endblock %}
