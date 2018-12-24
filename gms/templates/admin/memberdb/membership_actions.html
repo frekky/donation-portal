@@ -1,0 +1,7 @@
+{% load static %}
+<div class="member-actions">
+    <a class="button" href="{{ member_url }}">Edit Member</a>&nbsp;
+    {% if not ms.approved %}
+    <a class="button" href="{{ member_approve }}">Approve</a>&nbsp;
+    {% endif %}
+</div>

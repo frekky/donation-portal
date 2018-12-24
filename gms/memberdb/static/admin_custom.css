@@ -1,0 +1,24 @@
+#site-name {
+    display: inline-block;
+}
+
+.logo {
+    margin-left: 0px;
+    margin-right: 15px;
+    transform: rotate(45deg);
+}
+
+.logo:hover {
+    animation: spin 0.5s linear infinite;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+#branding h1 {
+    float: left;
+}
+
+#content-related.wide {
+    width: 400px;
+    margin-right: -440px;
+}

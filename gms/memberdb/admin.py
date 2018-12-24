@@ -1,156 +1,155 @@
-import csv
-from collections import OrderedDict
-from functools import wraps, singledispatch
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import path, reverse
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+from django.template.loader import render_to_string
 
-from django.contrib import admin
-from django.http import HttpResponse
-from django.db.models import FieldDoesNotExist
+from gms import admin
 
 from memberdb.models import Member, IncAssocMember, Membership
-
-# see download as CSV stuff below
-def prep_field(obj, field):
-    """
-    (for download_as_csv action)
-    Returns the field as a unicode string. If the field is a callable, it
-    attempts to call it first, without arguments.
-    """
-    if '__' in field:
-        bits = field.split('__')
-        field = bits.pop()
-
-        for bit in bits:
-            obj = getattr(obj, bit, None)
-
-            if obj is None:
-                return ""
-
-    attr = getattr(obj, field)
-    output = attr() if callable(attr) else attr
-    return unicode(output).encode('utf-8') if output is not None else ""
+from memberdb.actions import download_as_csv
+from memberdb.approve import MembershipApprovalForm, MembershipApprovalAdminView
 
 
-@singledispatch
-def download_as_csv(modeladmin, request, queryset):
-    """
-    Generic csv export admin action.
-
-    Example:
-
-        class ExampleModelAdmin(admin.ModelAdmin):
-            raw_id_fields = ('field1',)
-            list_display = ('field1', 'field2', 'field3',)
-            actions = [download_as_csv,]
-            download_as_csv_fields = [
-                'field1',
-                ('foreign_key1__foreign_key2__name', 'label2'),
-                ('field3', 'label3'),
-            ],
-            download_as_csv_header = True
-    """
-    fields = getattr(modeladmin, 'download_as_csv_fields', None)
-    exclude = getattr(modeladmin, 'download_as_csv_exclude', None)
-    header = getattr(modeladmin, 'download_as_csv_header', True)
-    verbose_names = getattr(modeladmin, 'download_as_csv_verbose_names', True)
-
-    opts = modeladmin.model._meta
-
-    def fname(field):
-        if verbose_names:
-            return unicode(field.verbose_name).capitalize()
-        else:
-            return field.name
-
-    # field_names is a map of {field lookup path: field label}
-    if exclude:
-        field_names = OrderedDict(
-            (f.name, fname(f)) for f in opts.fields if f not in exclude
-        )
-    elif fields:
-        field_names = OrderedDict()
-        for spec in fields:
-            if isinstance(spec, (list, tuple)):
-                field_names[spec[0]] = spec[1]
-            else:
-                try:
-                    f, _, _, _ = opts.get_field_by_name(spec)
-                except FieldDoesNotExist:
-                    field_names[spec] = spec
-                else:
-                    field_names[spec] = fname(f)
-    else:
-        field_names = OrderedDict(
-            (f.name, fname(f)) for f in opts.fields
-        )
-
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (
-            unicode(opts).replace('.', '_')
-        )
-
-    writer = csv.writer(response)
-
-    if header:
-        writer.writerow(field_names.values())
-
-    for obj in queryset:
-        writer.writerow([prep_field(obj, field) for field in field_names.keys()])
-    return response
-
-download_as_csv.short_description = "Download selected objects as CSV file"
-
-
-@download_as_csv.register(str)
-def _(description):
-    """
-    (overridden dispatcher)
-    Factory function for making a action with custom description.
-
-    Example:
-
-        class ExampleModelAdmin(admin.ModelAdmin):
-            raw_id_fields = ('field1',)
-            list_display = ('field1', 'field2', 'field3',)
-            actions = [download_as_csv("Export Special Report"),]
-            download_as_csv_fields = [
-                'field1',
-                ('foreign_key1__foreign_key2__name', 'label2'),
-                ('field3', 'label3'),
-            ],
-            download_as_csv_header = True
-    """
-    @wraps(download_as_csv)
-    def wrapped_action(modeladmin, request, queryset):
-        return download_as_csv(modeladmin, request, queryset)
-    wrapped_action.short_description = description
-    return wrapped_action
-
+def get_model_url(pk, model_name):
+    return reverse('admin:memberdb_%s_change' % model_name, args=[pk])
 
 """
-Customise the administrative interface for modifying Member records
+helper mixin to make the admin page display only "View" rather than "Change" or "Add"
 """
-class IAMemberAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'email_address']
-    search_fields = list_display
-    readonly_fields = ['updated', 'created']
+class ReadOnlyModelAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return False
+        
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+"""
+This makes use of some hacky javascript to replace the default "actions" dropdown list with more user-friendly buttons for each action.
+"""
+class ButtonActionModelAdmin(admin.ModelAdmin):
+    class Media:
+        js = ['action_buttons.js']
+
+"""
+Define the administrative interface for viewing member details required under the Incorporations Act
+"""
+class IAMemberAdmin(ButtonActionModelAdmin, ReadOnlyModelAdmin):
+    readonly_fields = ['__str__', 'updated', 'created']
+    fields = ['first_name', 'last_name', 'email_address', 'updated', 'created']
+    search_fields = ['first_name', 'last_name', 'email_address']
+    list_display = readonly_fields
     actions = [download_as_csv]
-    
-class MemberAdmin(IAMemberAdmin):
+
+    # add a "go to member" URL into the template context data
+    def change_view(self, request, object_id, form_url='', extra_context={}):
+        extra_context['member_edit_url'] = get_model_url(object_id, 'member')
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
+        
+class MembershipInline(admin.TabularInline):
+    model = Membership
+    readonly_fields = ['member', 'date_submitted']
+    radio_fields = {'payment_method': admin.VERTICAL, 'membership_type': admin.VERTICAL}
+    extra = 0
+    fk_name = 'member'
+
+class MemberAdmin(ButtonActionModelAdmin):
     list_display = ['first_name', 'last_name', 'display_name', 'username']
     list_filter = ['is_guild', 'is_student']
     readonly_fields = ['member_updated', 'updated', 'created']
     search_fields = list_display
+    actions = [download_as_csv]
+    inlines = [MembershipInline]
 
-class MembershipAdmin(admin.ModelAdmin):
+    # add a "go to member" URL into the template context data
+    def change_view(self, request, object_id, form_url='', extra_context={}):
+        extra_context['incassocmember_url'] = get_model_url(object_id, 'incassocmember')
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
+
+"""
+Define the admin page for viewing normal Member records (all details included) and approving them
+"""
+class MembershipAdmin(ButtonActionModelAdmin):
+    list_display = ['membership_info', 'membership_type', 'payment_method', 'approved', 'date_submitted', 'member_actions']
+    list_display_links = None
+    list_filter = ['approved']
     readonly_fields = ['date_submitted']
+    radio_fields = {'payment_method': admin.VERTICAL, 'membership_type': admin.VERTICAL}
 
+    # make the admin page queryset preload the parent records (Member) 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('member')
+
+    # add custom URLs to this model in the admin site
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('<object_id>/approve/', self.admin_site.admin_view(self.process_approve), name='membership-approve'),
+        ]
+        return custom_urls + urls
+
+    # display a short summary of relevant member / membership info for pending memberships
+    def membership_info(self, ms):
+        context = {
+            'ms': ms,
+            'member': ms.member,
+            'member_url': get_model_url(ms.member.pk, 'member'),
+        }
+        html = render_to_string('admin/memberdb/membership_summary.html', context)
+        return mark_safe(html)
+    
+    membership_info.short_description = 'Membership info'
+    membership_info.allow_tags = True
+
+    # called per record, returns HTML to display under the "Actions" column
+    def member_actions(self, ms):
+        context = {
+            'ms': ms,
+            'member': ms.member,
+            'member_url': get_model_url(ms.member.pk, 'member'),
+            'member_approve': reverse('admin:membership-approve', args=[ms.pk])
+        }
+        html = render_to_string('admin/memberdb/membership_actions.html', context)
+        return mark_safe(html)
+
+    member_actions.short_description = 'Actions'
+    member_actions.allow_tags = True
+
+    def process_approve(self, request, *args, **kwargs):
+        #breakpoint();
+        #member = self.get_object(request, member_id)
+        #return MembershipApprovalAdminView.as_view(member=member, admin=self)(request, *args, **kwargs)
+        return MembershipApprovalAdminView.as_view(admin=self)(request, *args, **kwargs)
+        """
+        if request.method != 'POST':
+            form = MembershipApprovalForm(instance=member)
+        else:
+            form = MembershipApprovalForm(request.POST, instance=member)
+            if form.is_valid():
+                form.save()
+
+                self.message_user(request, 'Approve success')
+                url = reverse(
+                    'admin:memberdb_member_change',
+                    args=[member.pk],
+                    current_app=self.admin_site.name,
+                )
+                return HttpResponseRedirect(url)
+
+        context = self.admin_site.each_context(request)
+        context['opts'] = self.model._meta
+        context['member'] = member
+        context['form'] = form
+
+        return render(request, 'admin/memberdb/membership_approve.html', context)
+        """
 
 # Register the other models with either default admin site pages or with optional customisations
 admin.site.register(Member, MemberAdmin)
-admin.site.register(Membership, MembershipAdmin)
 admin.site.register(IncAssocMember, IAMemberAdmin)
-
-# Customise the admin site
-admin.site.site_header = "Gumby Management System"
-admin.site.site_title = "UCC Gumby Management System"
-admin.site.index_title = "Membership Database"
+admin.site.register(Membership, MembershipAdmin)

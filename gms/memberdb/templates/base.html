@@ -3,6 +3,7 @@
 <html>
 <head>
 <title>{% block title %}{% endblock %}</title>
+<link rel="stylesheet" type="text/css" href="{% static "shared.css" %}">
 <link rel="stylesheet" type="text/css" href="{% static "main.css" %}">
 {% block extrahead %}{% endblock %}
 {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
@@ -15,7 +16,23 @@
 
     <!-- Header -->
     <div id="header">
-            {% block header %}{% endblock %}
+        {% block header %}{% endblock %}
+    
+        {% block navbar %}
+        <nav>
+            {% block branding %}
+            <a class="logo" href="https://ucc.asn.au"></a>
+            {% endblock %}
+            
+            {# fancy automatic navbar thing from https://stackoverflow.com/questions/39639264 #}
+            {% with url_name=request.resolver_match.url_name %}
+            <a class="navtab {% if url_name == 'home' %}active{% endif %}" href="{% url "memberdb:home" %}">Member home</a>
+            <a class="navtab {% if url_name == 'register' %}active{% endif %}" href="{% url "memberdb:register" %}">Register</a>
+            <a class="navtab {% if url_name == 'renew' %}active{% endif %}" href="{% url "memberdb:renew" %}">Renew membership</a>
+            <a class="navtab" href="{% url "admin:index" %}">Admin site</a>
+            {% endwith %}
+        </nav>
+        {% endblock %}
     </div>
     <!-- END Header -->
 
@@ -34,7 +51,10 @@
     <!-- Footer -->
     {% block footer %}
     <div id="footer">
-
+        <p>
+            The University Computer Club Inc.
+            ABN: 98 843 368 069
+        </p>
     </div>
     {% endblock %}
     <!-- END Footer -->    
