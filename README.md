@@ -1,19 +1,20 @@
 uccportal - the UCC Computer Controlled Proletarian Organisational Roster That Accesses LDAP
 ============================================================================================
 
+
 TODO: This is designed to be the ultimate membership management suite for UCC. Signups are electronic and automatic, data is able to be conveniently stored in the member database and some of it is even automatically validated.
 
 Stuff to do
 -----------
 
 - Important structural TODO:
-    - Design database schema for rolling memberships
-    - Build member-facing initial registration form
-    - Build door-facing pending membership approval form
+    - Design database schema for rolling memberships [done]
+    - Build member-facing initial registration form [done, but really ugly]
+    - Build door-facing pending membership approval form [done]
     - Build member-facing post-approval (or post-email-confirmation) registration form
     - Build member-facing renewal form
 - Stuff to do after structural bits
-    - Administrative user authentication via LDAP/AD
+    - Administrative user authentication via LDAP/AD [done]
     - Automatic member account creation (after membership approved)
 
 Eventual / Conceptual Workflow Design
@@ -21,7 +22,7 @@ Eventual / Conceptual Workflow Design
 
 - __Use case 1: new member__:
     1. New member enters details on registration form, submits
-        - Gets confirmation email
+        - Gets confirmation email (maybe with link to click to confirm the email address?)
     2. Door member logs in and verifies that details are correct, manages payment
         - Cash: door member takes cash and enters amount paid by cash
         - Card (in person): door member enters amount to charge, processed via Square App or custom POS app (Android)
@@ -44,6 +45,7 @@ Eventual / Conceptual Workflow Design
 Environment Setup
 -----------------
 
+- This project uses Python 3.7
 - Install `python-virtualenv`
 - `git clone https://gitlab.ucc.asn.au/frekk/uccportal uccportal`
 - `cd uccportal`
@@ -54,16 +56,8 @@ Environment Setup
 
 -----------------------------------------------------------
 
-GMS - The Gumby Management System [DEPRECATED]
-==============================================
-Written by David Adam <zanchey@ucc.gu.uwa.edu.au>
-Derived from MemberDB by Danni Madeley
-
-> That's where this whole thing started! 
-> - [FVP]
-
-GETTING STARTED EACH YEAR
-------------------------
+GETTING STARTED EACH YEAR [DEPRECATED]
+--------------------------------------
 
 To set up a new database,
 
@@ -106,3 +100,8 @@ and allow them access to the memberdb permissions.
 A CSV download function has been added - select the members you want to
 download in the administration interface, then choose Download as CSV file
 from the Actions menu.
+
+Credits
+-------
+- Adapted from `Gumby Management System` written by David Adam <zanchey@ucc.gu.uwa.edu.au>
+- Derived from MemberDB by Danni Madeley
