@@ -1,19 +1,22 @@
+html {
+    height: 100%;
+}
+
 body {
-    width: 100%;
+    min-height: 100%;
+    position: relative;
     background-color: yellow;
     font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
 }
 
 * {
     box-sizing: border-box;
 }
 
-#form-register {
-    position: absolute;
-    width: 400px;
-
-    padding-top: 50%;
-
+#content {
+    width: 80%;
+    margin: 0 10%;
 }
 
 .centered {
@@ -23,30 +26,55 @@ body {
     transform: translate(-50%, -50%);
 }
 
-.modal {
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: thistle;
-    opacity: 0.6;
-}
-
 .form-container {
     background-color: #ffe;
     border-style: 2px solid #8fc;
     border-radius: 5px;
     padding: 20px;
-    z-index: 2;
     margin: 40px;
 }
 
-.form-container p {
-    margin: 0;
+fieldset {
+    border: none;
+}
+
+.form-row {
+    margin: 10px 10px 20px 10px;
+    overflow: auto;
+}
+
+.submit-row {
+    margin: 10px;
+    overflow: auto; /* stop parent div from collapsing when contents are floated */
+}
+
+.form-row label {
+    font-weight: bold;
+    display: inline;
+}
+
+/* style text boxes */
+.form-row input[type="text"],
+.form-row input[type="email"] {
+    display: block;
+    padding: 4px;
+    font-size: 14px;
+    line-height: 20px;
     width: 100%;
-    display: inline-block;
+}
+
+.form-row input[type=checkbox] {
+    display: inline;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.help {
+    margin: 0 40px;
+}
+
+.help a {
+    color: #777;
 }
 
 ul.errorlist {
@@ -58,15 +86,51 @@ ul.errorlist {
     font-weight: bold;
 }
 
-.form-container label {
-    font-weight: bold;
+.logo {
+    margin: 5px 30px 5px 20px;
 }
 
-.form-container input {
-    float: right;
-    padding: 4px;
+nav {
+    background-color: #333;
+    height: 60px;
+}
+
+.navtab {
+    float: left;
+    text-decoration: none;
+    color: white;
+    text-align: center;
+    font-size: 22px;
+    font-variant-caps: all-petite-caps;
+    font-weight: 400;
+    line-height: 40px;
+    padding: 10px 20px;
+    border-left: 1.5px solid #555;
+    background-color: #3c3c3c;
+}
+
+.navtab:hover, .navtab.active {
+    color: #eee;
+    background-color: black;
+}
+
+.navtab:last-child {
+    border-right: 1.5px solid #555;
+}
+
+#container {
+    padding-bottom: 60px;
+}
+
+#footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
     width: 100%;
-    padding: 10px;
-    margin: 3px 0 22px 0;
-    font-size: 20px;
+    clear: both;
+    background-color: #ccc;
+    color: #777;
+    text-align: center;
+    overflow: hidden;
+    z-index: -1;
 }
