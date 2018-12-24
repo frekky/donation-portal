@@ -13,7 +13,8 @@ ADMINS = (
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',     # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'member.db',                        # Or path to database file if using sqlite3.
+        # this should end up in uccportal/.db/members.db
+        'NAME': os.path.join(os.path.dirname(BASE_DIR), '.db', 'members.db'),   # Or path to database file if using sqlite3.
         'USER': '',                                 # Not used with sqlite3.
         'PASSWORD': '',                             # Not used with sqlite3.
         'HOST': '',                                 # Set to empty string for localhost. Not used with sqlite3.
@@ -29,8 +30,11 @@ ALLOWED_HOSTS = []
 import ldap
 from django_auth_ldap.config import LDAPSearch, ActiveDirectoryGroupType, LDAPGroupQuery
 
+# this could be ad.ucc.gu.uwa.edu.au but that doesn't resolve externally -
+# useful for testing, but should be changed in production so failover works
 AUTH_LDAP_SERVER_URI = 'ldaps://samson.ucc.gu.uwa.edu.au/'
 
+# This is also a bad idea, should be changed in production
 AUTH_LDAP_GLOBAL_OPTIONS = {
     ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_NEVER,
 }
@@ -49,6 +53,7 @@ AUTH_LDAP_GROUP_SEARCH = LDAPSearch("OU=Groups,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,
 AUTH_LDAP_GROUP_TYPE = ActiveDirectoryGroupType()
 
 # Populate the Django user from the LDAP directory.
+# note: somehow the LDAP/AD users don't have firstName/sn, rather the full name is in name or displayName
 AUTH_LDAP_USER_ATTR_MAP = {
     "first_name": "displayName",
     "last_name": "name"
@@ -59,7 +64,10 @@ AUTH_LDAP_USER_FLAGS_BY_GROUP = {
         LDAPGroupQuery("CN=committee,OU=Groups,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au") |
         LDAPGroupQuery("CN=door,OU=Groups,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au")
     ),
-    "is_superuser": "CN=committee,OU=Groups,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au",
+    "is_superuser": (
+        LDAPGroupQuery("CN=committee,OU=Groups,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au") |
+        LDAPGroupQuery("CN=wheel,OU=Groups,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au")
+    )
 }
 
 AUTH_LDAP_ALWAYS_UPDATE_USER = True

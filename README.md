@@ -51,7 +51,11 @@ Environment Setup
 - `cd uccportal`
 - `virtualenv env`
 - Every time you want to do some uccportal development, do `source env/bin/activate` to set up your environment
-- install python dependencies to local environment: `pip install -r pip-packages.txt`
+- Install python dependencies to local environment: `pip install -r pip-packages.txt`
+- Configure django: `cp gms/gms/settings_local.example.py gms/gms/settings_local.py`
+    - Edit `gms/gms/settings_local.py` and check that the database backend is configured correctly. (sqlite3 is fine for development)
+- Initialise the database: `gms/manage.py makemigrations && gms/manage.py migrate`
+    - Make sure you run this again if you make any changes to `gms/memberdb/models.py` to keep the DB schema in sync.
 - Run the local development server with `gms/manage.py runserver`
 
 -----------------------------------------------------------
@@ -62,11 +66,12 @@ GETTING STARTED EACH YEAR [DEPRECATED]
 To set up a new database,
 
 (as root on mussel)
-
+```
 mussel:~# su - postgres
 postgres@mussel:~$ psql
 postgres=# create database uccmemberdb_20XX;
 postgres=# GRANT ALL on DATABASE uccmemberdb_20XX to uccmemberdb;
+```
 
 Adjust /services/gms/gms/settings_local.py to point to the new database (usually
 changing the databse name is enough).
@@ -77,10 +82,12 @@ Edit /service/gms/memberdb/models.py
 In /services/gms, run `python manage.py makemigrations` to prepare the databae
 updates.
 
+```
 mussel:~# cd /services/gms/
 mussel:/services/gms# python manage.py validate
 0 errors found
 mussel:/services/gms# python manage.py syncdb
+
 ...
 You just installed Django's auth system, which means you don't have any
  superusers defined.
@@ -88,6 +95,7 @@ Would you like to create one now? (yes/no): no
 
 Now restart MemberDB by runing
 mussel:/services/gms# touch gms/wsgi.wsgi
+```
 
 Now go ahead and log in to the website. It will be totally fresh, with all
 committee members being made superusers on first login.
