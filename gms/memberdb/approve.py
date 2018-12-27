@@ -5,11 +5,12 @@ See ../../README.md for details
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from django.views.generic.edit import UpdateView
 from django.utils import timezone
 from django import forms
 
 from memberdb.models import Member, Membership, MEMBERSHIP_TYPES_
+from memberdb.forms import MyModelForm
+from memberdb.views import MyUpdateView
 
 def get_membership_type(member):
     best = None
@@ -37,11 +38,9 @@ inline admin change list action buttons
 see https://medium.com/@hakibenita/how-to-add-custom-action-buttons-to-django-admin-8d266f5b0d41
 and have a look at .admin.MembershipAdmin
 """
-class MembershipApprovalForm(forms.ModelForm):
+class MembershipApprovalForm(MyModelForm):
     payment_confirm = forms.BooleanField(label='Confirm payment', required=False)
-    
-    # this must be passed by kwargs upon instantiating the form
-    request = None
+
 
     class Meta:
         model = Membership
@@ -50,10 +49,6 @@ class MembershipApprovalForm(forms.ModelForm):
             'membership_type': forms.RadioSelect(),
             'payment_method': forms.RadioSelect(),
         }
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request")
-        super().__init__(*args, **kwargs)
 
     """
     Called to validate the data on the form.
@@ -103,7 +98,7 @@ class MembershipApprovalForm(forms.ModelForm):
             ms.save()
         return ms
 
-class MembershipApprovalAdminView(UpdateView):
+class MembershipApprovalAdminView(MyUpdateView):
     template_name = 'admin/memberdb/membership_approve.html'
     form_class = MembershipApprovalForm
     model = Membership
@@ -124,10 +119,6 @@ class MembershipApprovalAdminView(UpdateView):
         })
         return context
 
-    def get_form_kwargs(self, **kwargs):
-        kwargs.update(super().get_form_kwargs())
-        kwargs.update({'request': self.request})
-        return kwargs
 
     """
     called when the approval form is submitted and valid data (according to the form's field types and defined validators) is given
