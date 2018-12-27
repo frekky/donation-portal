@@ -93,7 +93,7 @@ Note: Privacy laws are a thing, unless people allow it then we cannot provide th
 """
 class Member (IncAssocMember):
     display_name    = models.CharField ('Display name', max_length=200)
-    username        = models.SlugField ('Username', max_length=32, blank=False, unique=True, validators=[RegexValidator(regex='^[a-z0-9._-]+$')])
+    username        = models.SlugField ('Username', max_length=32, null=False, blank=False, unique=True, validators=[RegexValidator(regex='^[a-z0-9._-]+$')])
     phone_number    = models.CharField ('Phone number', max_length=20, blank=False, validators=[RegexValidator(regex='^\+?[0-9() -]+$')])
     is_student      = models.BooleanField ('Student at UWA', default=True, blank=True)
     is_guild        = models.BooleanField ('UWA Guild member', default=True, blank=True)
