@@ -31,7 +31,13 @@ body {
     border-style: 2px solid #8fc;
     border-radius: 5px;
     padding: 20px;
-    margin: 40px;
+    margin: 10px;
+}
+
+.form-container .tips {
+    margin: 10px 10px 20px 10px;
+    color: #555;
+    text-align: center;
 }
 
 fieldset {
@@ -55,7 +61,8 @@ fieldset {
 
 /* style text boxes */
 .form-row input[type="text"],
-.form-row input[type="email"] {
+.form-row input[type="email"],
+.form-row input[type="password"] {
     display: block;
     padding: 4px;
     font-size: 14px;
@@ -63,10 +70,17 @@ fieldset {
     width: 100%;
 }
 
-.form-row input[type=checkbox] {
+.form-row input[type=checkbox],
+.form-row.readonly .text {
     display: inline;
     font-size: 14px;
     line-height: 20px;
+}
+
+.form-row.readonly .text {
+    font-size: 16px;
+    padding-left: 10px;
+    color: #444;
 }
 
 .help {

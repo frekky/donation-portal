@@ -1,12 +1,25 @@
-<h1>Renew membership for {{ m.username }}</h1>
+{% extends "register.html" %}
+{% block title %}UCC Membership Renewal{% endblock %}
+{% block content_title %}
+    <h1>Renew your membership</h1>
+{% endblock %}
 
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% block tips %}
+{% if is_new %}
+<b>Your account exists already but no membership information has yet been recorded in this system.</b>
+<br>Please update/correct the details below as necessary.
+{% else %}
+Please confirm that the details below have not changed since your last registration or membership renewal.
+{% endif %}
+{% endblock %}
 
-<form action="{% url 'memberdb:renew' m.username %}" method="post">
-{% csrf_token %}
-{% for choice in question.choice_set.all %}
-    <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
-{% endfor %}
-<input type="submit" value="Vote">
-</form>
+{% block extra_preform %}
+<div class="form-row readonly">
+    <label for="id_username">Username:</label>
+    <span class="text" id="id_username">{{ request.user.username }}</span>
+</div>
+{% endblock %}
+
+{% block action_url %}{% url 'memberdb:renew' %}{% endblock %}
+
+{% block action_text %}Renew{% endblock %}
