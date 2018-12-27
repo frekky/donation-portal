@@ -54,6 +54,8 @@ USE_L10N = True
 
 USE_TZ = True
 
+LOGIN_URL = 'memberdb:login'
+LOGIN_REDIRECT_URL = 'memberdb:index'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
@@ -62,6 +64,7 @@ STATIC_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 AUTHENTICATION_BACKENDS = [
+    # see https://django-auth-ldap.readthedocs.io/en/latest for configuration info
     'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]

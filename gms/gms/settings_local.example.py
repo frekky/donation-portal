@@ -56,7 +56,8 @@ AUTH_LDAP_GROUP_TYPE = ActiveDirectoryGroupType()
 # note: somehow the LDAP/AD users don't have firstName/sn, rather the full name is in name or displayName
 AUTH_LDAP_USER_ATTR_MAP = {
     "first_name": "displayName",
-    "last_name": "name"
+    "last_name": "name",
+    "email": "email",
 }
 
 AUTH_LDAP_USER_FLAGS_BY_GROUP = {
