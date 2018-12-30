@@ -33,9 +33,10 @@
             {% else %}
             <a class="navtab {% if url_name == 'home' %}active{% endif %}" href="{% url "memberdb:home" %}">Member home</a>
             <a class="navtab {% if url_name == 'renew' %}active{% endif %}" href="{% url "memberdb:renew" %}">Renew membership</a>
-            {% endif %}
             {% if request.user.is_staff %}
             <a class="navtab" href="{% url "admin:index" %}">Admin site</a>
+            {% endif %}
+            <a class="navtab {% if url_name == 'logout' %}active{% endif %}" href="{% url "memberdb:logout" %}">Logout</a>
             {% endif %}
             {% endwith %}
         </nav>
