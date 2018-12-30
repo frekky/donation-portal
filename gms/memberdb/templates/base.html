@@ -5,6 +5,7 @@
 <title>{% block title %}{% endblock %}</title>
 <link rel="stylesheet" type="text/css" href="{% static "shared.css" %}">
 <link rel="stylesheet" type="text/css" href="{% static "main.css" %}">
+<link rel="shortcut icon" type="image/png" href="{% static 'ucc-logo.png' %}"/>
 {% block extrahead %}{% endblock %}
 {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
 </head>
@@ -26,10 +27,16 @@
             
             {# fancy automatic navbar thing from https://stackoverflow.com/questions/39639264 #}
             {% with url_name=request.resolver_match.url_name %}
-            <a class="navtab {% if url_name == 'home' %}active{% endif %}" href="{% url "memberdb:home" %}">Member home</a>
+            {% if not request.user.is_authenticated %}
+            <a class="navtab {% if url_name == 'home' %}active{% endif %}" href="{% url "memberdb:home" %}">Login</a>
             <a class="navtab {% if url_name == 'register' %}active{% endif %}" href="{% url "memberdb:register" %}">Register</a>
+            {% else %}
+            <a class="navtab {% if url_name == 'home' %}active{% endif %}" href="{% url "memberdb:home" %}">Member home</a>
             <a class="navtab {% if url_name == 'renew' %}active{% endif %}" href="{% url "memberdb:renew" %}">Renew membership</a>
+            {% endif %}
+            {% if request.user.is_staff %}
             <a class="navtab" href="{% url "admin:index" %}">Admin site</a>
+            {% endif %}
             {% endwith %}
         </nav>
         {% endblock %}
@@ -38,7 +45,7 @@
 
     <!-- Content -->
     <div id="content">
-        {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
+        {% block content_title %}{% endblock %}
         {% block content %}
         {% endblock %}
     </div>

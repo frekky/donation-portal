@@ -29,12 +29,16 @@
 {% endfor %}
 {% endif %}
 
+
+<p class="tips">
 {% if user.is_authenticated %}
-<p class="errornote">
-    You are authenticated as {{ user.username }}, but are not authorized to
-    access this page. Would you like to login to a different account?
-</p>
+    You are already logged in as {{ user.username }}.
+    Would you like to login to a different account?
+{% else %}
+    <b>Please enter your UCC username and password below.</b> <br><br>
+    If you do not have a UCC account yet, please apply for a membership by going to the <a href="{% url 'memberdb:register' %}">registration page</a>.
 {% endif %}
+</p>
 
 <form action="{% url 'memberdb:login' %}" method="post" id="login-form">
   {% csrf_token %}

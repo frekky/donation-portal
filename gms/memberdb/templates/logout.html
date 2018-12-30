@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}UCC Member Logout{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "login.css" %}">
+{{ form.media }}
+{% endblock %}
+
+{% block content_title %}<h1>Logout</h1>{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+
+<p>
+    <b>You are now logged out of MemberDB.</b>
+</p>
+
+<p>
+    <a href="{% url 'memberdb:login' %}">Click here</a> to log back in again.
+</p>
+
+{% endblock %}
