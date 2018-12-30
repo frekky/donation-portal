@@ -71,7 +71,11 @@ class MembershipApprovalForm(MyModelForm):
         data['date_approved'] = now
 
         if (data['payment_confirm'] == True):
+            if (data['payment_method'] == ''):
+                self.add_error('payment_method', 'Please select a payment method')
             data['date_paid'] = now
+        else:
+            data['date_paid'] = None
         
         # make sure "no payment" is recorded for Life Members.
         # XXX this might not actually be the case, since some life members may want to also be financial members (ie. for constitutional voting rights)
@@ -124,7 +128,6 @@ class MembershipApprovalAdminView(MyUpdateView):
     called when the approval form is submitted and valid data (according to the form's field types and defined validators) is given
     """
     def form_valid(self, form):
-        breakpoint()
         ms = form.save()
         
         self.admin.message_user(self.request, 'Approve success')
