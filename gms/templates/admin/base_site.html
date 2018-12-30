@@ -4,6 +4,10 @@
 
 {% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
+{% block extrahead %}
+<link rel="shortcut icon" type="image/png" href="{% static 'ucc-logo.png' %}"/>
+{% endblock %}
+
 {% block extrastyle %}
 <link rel="stylesheet" type="text/css" href="{% static "shared.css" %}">
 <link rel="stylesheet" type="text/css" href="{% static "admin_custom.css" %}">
