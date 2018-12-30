@@ -28,7 +28,10 @@ def get_membership_type(member):
         return best['dispense']
 
 def make_pending_membership(member):
-    ms = Membership(member=member, approved=False)
+    # check if this member already has a pending membership
+    ms = Membership.objects.filter(member=member, approved__exact=False).first()
+    if (ms is None):
+        ms = Membership(member=member, approved=False)
     ms.date_submitted = timezone.now()
     ms.membership_type = get_membership_type(member)
     return ms
@@ -40,7 +43,6 @@ and have a look at .admin.MembershipAdmin
 """
 class MembershipApprovalForm(MyModelForm):
     payment_confirm = forms.BooleanField(label='Confirm payment', required=False)
-
 
     class Meta:
         model = Membership
@@ -105,7 +107,6 @@ class MembershipApprovalAdminView(MyUpdateView):
     pk_url_kwarg = 'object_id'
     # override with the instance of ModelAdmin
     admin = None
-    object = None
 
     def get_context_data(self, **kwargs):
         ms = self.get_object()
@@ -118,7 +119,6 @@ class MembershipApprovalAdminView(MyUpdateView):
             'show_member_summary': True,
         })
         return context
-
 
     """
     called when the approval form is submitted and valid data (according to the form's field types and defined validators) is given

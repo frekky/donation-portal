@@ -2,10 +2,9 @@
 This file implements the member-facing registration workflow. See ../../README.md
 """
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
 from django import forms
@@ -73,9 +72,6 @@ class RenewForm(RegisterForm):
             m.save()
             ms.save()
         return m, ms
-
-
-
 
 """
 simple FormView which displays registration form and handles template rendering & form submission
