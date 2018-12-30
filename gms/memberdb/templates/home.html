@@ -1,0 +1,25 @@
+{% extends "register.html" %}
+{% block title %}UCC Member Home{% endblock %}
+{% block content_title %}
+    <h1>Member home</h1>
+{% endblock %}
+
+{% block tips %}
+{% if not object %}
+<b>Your account exists already but no membership information has yet been recorded in this system.</b>
+<br>Please update/correct the details below as necessary.
+{% else %}
+Please confirm that the details below have not changed since your last registration or membership renewal.
+{% endif %}
+{% endblock %}
+
+{% block extra_preform %}
+<div class="form-row readonly">
+    <label for="id_username">Username:</label>
+    <span class="text" id="id_username">{{ request.user.username }}</span>
+</div>
+{% endblock %}
+
+{% block action_url %}{% url 'memberdb:renew' %}{% endblock %}
+
+{% block action_text %}Renew{% endblock %}

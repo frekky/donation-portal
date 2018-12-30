@@ -1,5 +1,7 @@
 from django import forms
 
+from .models import Member, Membership
+
 """
 Custom ModelForm class with some extra features
 """
@@ -11,5 +13,7 @@ class MyModelForm(forms.ModelForm):
         self.request = kwargs.pop("request")
         super().__init__(*args, **kwargs)
 
-
-
+class MemberHomeForm(MyModelForm):
+    class Meta:
+        model = Member
+        fields = ['display_name', 'email_address', 'phone_number']

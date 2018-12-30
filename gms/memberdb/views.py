@@ -4,9 +4,10 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.forms import ModelForm
 from django.views.generic.edit import UpdateView
-from django import forms
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Member, IncAssocMember, Membership
+from .forms import MemberHomeForm
 
 def index(request):
     member_list = Member.objects.all()
@@ -32,9 +33,32 @@ class MyUpdateView(UpdateView):
     object = None
 
     def get_object(self):
-        return self.object
+        if (not self.object is None):
+            return self.object
+        try:
+            sobj = super().get_object()
+            if (not sobj is None):
+                return sobj
+        finally:
+            return None
 
     def get_form_kwargs(self, **kwargs):
         kwargs.update(super().get_form_kwargs())
         kwargs.update({'request': self.request})
         return kwargs
+
+class MemberHomeView(LoginRequiredMixin, MyUpdateView):
+    model = Member
+    template_name = 'home.html'
+    form_class = MemberHomeForm
+
+    def get_object(self):
+        return Member.objects.filter(username__exact=self.request.user.username).first()
+
+    def get_context_data(self):
+        d = super().get_context_data()
+        m = self.get_object()
+        d.update({
+            'memberships': m.memberships.all() if m is not None else None,
+        })
+        return d
