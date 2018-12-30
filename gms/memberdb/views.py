@@ -3,6 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.forms import ModelForm
+from django.contrib import messages
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -63,3 +64,8 @@ class MemberHomeView(LoginRequiredMixin, MyUpdateView):
             'memberships': m.memberships.all() if m is not None else None,
         })
         return d
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Member details updated.')
+        # redirect to ourselves?!! because I can't think of a less hacky way to do this
+        return HttpResponseRedirect(reverse('memberdb:home'))

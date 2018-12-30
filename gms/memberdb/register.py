@@ -51,8 +51,8 @@ class RegisterForm(MyModelForm):
         m = super().save(commit=False)
         if (m.display_name == ""):
             m.display_name = "%s %s" % (m.first_name, m.last_name);
-        if (commit):
-            m.save()
+        # must save otherwise membership creation will fail
+        m.save()
 
         # now create a corresponding Membership (marked as pending / not accepted, mostly default values)
         ms = make_pending_membership(m)
@@ -90,7 +90,8 @@ class RegisterView(MyUpdateView):
     def form_valid(self, form):
         # save the member data and get the Member instance
         m, ms = form.save()
-        return HttpResponseRedirect(reverse("memberdb:home"))
+        #messages.success(self.request, 'Your registration has been submitted.')
+        return HttpResponseRedirect(reverse("memberdb:thanks"))
 
 class RenewView(LoginRequiredMixin, MyUpdateView):
     template_name = 'renew.html'
@@ -112,11 +113,11 @@ class RenewView(LoginRequiredMixin, MyUpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
-            'is_new': self.object == None,
+            'is_new': Member.objects.filter(username__exact=self.request.user.username).count() == 0,
         })
         return context
 
     def form_valid(self, form):
         m, ms = form.save()
-
+        messages.success(self.request, 'Your membership renewal has been submitted.')
         return HttpResponseRedirect(reverse("memberdb:home"))

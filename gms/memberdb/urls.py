@@ -1,5 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from django.views.generic.base import TemplateView
 
 from . import views
 from .views import MemberHomeView
@@ -8,6 +9,7 @@ from .register import RegisterView, RenewView
 app_name = 'memberdb'
 urlpatterns = [
     path('', MemberHomeView.as_view(), name='home'),
+    path('', MemberHomeView.as_view(), name='index'),
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='logout.html'), name='logout'),
 
@@ -18,5 +20,6 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('renew/', RenewView.as_view(), name='renew'),
     path('active/', views.getactive, name='actives'),
+    path('thanks/', TemplateView.as_view(template_name='thanks.html'), name='thanks'),
     #path('<str:username>/', views.info, name='info'),
 ]
