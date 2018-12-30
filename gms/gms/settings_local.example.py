@@ -14,13 +14,21 @@ ADMINS = (
 ### Database connection options ###
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',     # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.sqlite3',     # Add 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         # this should end up in uccportal/.db/members.db
         'NAME': os.path.join(ROOT_DIR, '.db', 'members.db'),   # Or path to database file if using sqlite3.
         'USER': '',                                 # Not used with sqlite3.
         'PASSWORD': '',                             # Not used with sqlite3.
         'HOST': '',                                 # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                                 # Set to empty string for default. Not used with sqlite3.
+    },
+    'memberdb_old': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'uccmemberdb_2018',
+        'USER': 'uccmemberdb',
+        'PASSWORD': 'something-secret-here',
+        'HOST': 'mussel.ucc.gu.uwa.edu.au',
+        'PORT': '',
     }
 }
 

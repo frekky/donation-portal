@@ -97,7 +97,15 @@ class RenewView(LoginRequiredMixin, MyUpdateView):
     model = Member
 
     def get_object(self):
-        obj = Member.objects.filter(username__exact=self.request.user.username).first()
+        u = self.request.user
+
+        obj = Member.objects.filter(username__exact=u.username).first()
+        if (obj is None):
+            # make a new Member object and prefill some data
+            obj = Member(username=u.username)
+            obj.first_name = u.first_name
+            obj.last_name = u.last_name
+            obj.email_address = u.email
         return obj
 
     def get_context_data(self, **kwargs):
@@ -106,17 +114,6 @@ class RenewView(LoginRequiredMixin, MyUpdateView):
             'is_new': self.object == None,
         })
         return context
-
-    # get the initial data with which to pre-fill the form
-    def get_initial(self):
-        data = super().get_initial()
-        u = self.request.user
-        data.update({
-            'first_name': u.first_name,
-            'last_name': u.last_name,
-            'email_address': u.email,
-        })
-        return data
 
     def form_valid(self, form):
         m, ms = form.save()

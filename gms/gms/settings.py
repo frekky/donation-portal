@@ -21,6 +21,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'memberdb',
+    'import_members',
 )
 
 MIDDLEWARE = [
@@ -53,6 +54,8 @@ USE_TZ = True
 
 LOGIN_URL = 'memberdb:login'
 LOGIN_REDIRECT_URL = 'memberdb:index'
+
+DATABASE_ROUTERS = ['import_members.db.MemberDbRouter']
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
