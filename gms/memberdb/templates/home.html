@@ -6,10 +6,10 @@
 
 {% block tips %}
 {% if not object %}
-<b>Your account exists already but no membership information has yet been recorded in this system.</b>
-<br>Please update/correct the details below as necessary.
+<b>You have no member record associated with this account.</b><br>
+Please <a href="{% url 'memberdb:renew' %}">renew your membership</a> to get started.
 {% else %}
-Please confirm that the details below have not changed since your last registration or membership renewal.
+You can see and modify some of your membership and account details below.
 {% endif %}
 {% endblock %}
 
@@ -20,6 +20,10 @@ Please confirm that the details below have not changed since your last registrat
 </div>
 {% endblock %}
 
-{% block action_url %}{% url 'memberdb:renew' %}{% endblock %}
+{% block form %}
+{% if object %} {{ block.super }} {% endif %}
+{% endblock %}
 
-{% block action_text %}Renew{% endblock %}
+{% block action_url %}{% url 'memberdb:home' %}{% endblock %}
+
+{% block action_text %}Update details{% endblock %}

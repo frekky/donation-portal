@@ -15,6 +15,7 @@
 
 <div class="form-container">
 
+<div class="form-header">
 {% if form.errors and not form.non_field_errors %}
 <p class="errornote">
 {% if form.errors.items|length == 1 %}Please correct the error below.{% else %}Please correct the errors below.{% endif %}
@@ -39,6 +40,7 @@
     If you do not have a UCC account yet, please apply for a membership by going to the <a href="{% url 'memberdb:register' %}">registration page</a>.
 {% endif %}
 </p>
+</div>
 
 <form action="{% url 'memberdb:login' %}" method="post" id="login-form">
   {% csrf_token %}

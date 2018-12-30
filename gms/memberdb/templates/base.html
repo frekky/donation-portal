@@ -17,8 +17,6 @@
 
     <!-- Header -->
     <div id="header">
-        {% block header %}{% endblock %}
-    
         {% block navbar %}
         <nav>
             {% block branding %}
@@ -41,6 +39,14 @@
             {% endwith %}
         </nav>
         {% endblock %}
+
+        {% block header %}{% endblock %}
+        
+        {% block messages %}{% if messages %}
+        <ul class="messagelist">{% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+        {% endfor %}</ul>
+        {% endif %}{% endblock messages %}
     </div>
     <!-- END Header -->
 

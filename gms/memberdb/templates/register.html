@@ -6,12 +6,15 @@
 
 {% block content %}
 <div class="form-container">
-    <p class="tips">
+    <div class="form-header">
+    <span class="tips">
     {% block tips %}
         Enter your details, and press "Register" when you are done.<br>
         Once your membership has been approved, you will receive an email with further instructions to activate your account.
     {% endblock %}
-    </p>
+    </span>
+    </div>
+    {% block form %}
     <form action="{% block action_url %}{% url 'memberdb:register' %}{% endblock %}" method="post">
 
         {% csrf_token %}
@@ -41,5 +44,6 @@
             <input type="submit" class="default" value="{% block action_text %}Register{% endblock %}">
         </div>
     </form>
+    {% endblock %}
 </div>
 {% endblock %}
