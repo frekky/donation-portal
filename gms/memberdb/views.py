@@ -39,8 +39,9 @@ class MyUpdateView(UpdateView):
             sobj = super().get_object()
             if (not sobj is None):
                 return sobj
-        finally:
-            return None
+        except:
+            pass
+        return None
 
     def get_form_kwargs(self, **kwargs):
         kwargs.update(super().get_form_kwargs())
