@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
+from django.contrib import messages
 from django import forms
 
 from .models import Member, Membership
@@ -89,7 +90,7 @@ class RegisterView(MyUpdateView):
     def form_valid(self, form):
         # save the member data and get the Member instance
         m, ms = form.save()
-        return HttpResponseRedirect(reverse("memberdb:index"))
+        return HttpResponseRedirect(reverse("memberdb:home"))
 
 class RenewView(LoginRequiredMixin, MyUpdateView):
     template_name = 'renew.html'
@@ -117,4 +118,5 @@ class RenewView(LoginRequiredMixin, MyUpdateView):
 
     def form_valid(self, form):
         m, ms = form.save()
-        return HttpResponseRedirect(reverse("memberdb:index"))
+
+        return HttpResponseRedirect(reverse("memberdb:home"))
