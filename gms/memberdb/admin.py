@@ -23,22 +23,15 @@ class ReadOnlyModelAdmin(admin.ModelAdmin):
         return False
         
     def has_delete_permission(self, request, obj=None):
-        return False
+        return True
 
     def has_change_permission(self, request, obj=None):
         return False
 
 """
-This makes use of some hacky javascript to replace the default "actions" dropdown list with more user-friendly buttons for each action.
-"""
-class ButtonActionModelAdmin(admin.ModelAdmin):
-    class Media:
-        js = ['action_buttons.js']
-
-"""
 Define the administrative interface for viewing member details required under the Incorporations Act
 """
-class IAMemberAdmin(ButtonActionModelAdmin, ReadOnlyModelAdmin):
+class IAMemberAdmin(ReadOnlyModelAdmin):
     readonly_fields = ['__str__', 'updated', 'created']
     fields = ['first_name', 'last_name', 'email_address', 'updated', 'created']
     search_fields = ['first_name', 'last_name', 'email_address']
@@ -57,7 +50,7 @@ class MembershipInline(admin.TabularInline):
     extra = 0
     fk_name = 'member'
 
-class MemberAdmin(ButtonActionModelAdmin):
+class MemberAdmin(admin.ModelAdmin):
     list_display = ['first_name', 'last_name', 'display_name', 'username']
     list_filter = ['is_guild', 'is_student']
     readonly_fields = ['member_updated', 'updated', 'created']
@@ -73,7 +66,7 @@ class MemberAdmin(ButtonActionModelAdmin):
 """
 Define the admin page for viewing normal Member records (all details included) and approving them
 """
-class MembershipAdmin(ButtonActionModelAdmin):
+class MembershipAdmin(admin.ModelAdmin):
     list_display = ['membership_info', 'membership_type', 'payment_method', 'approved', 'date_submitted', 'member_actions']
     list_display_links = None
     list_filter = ['approved']

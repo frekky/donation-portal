@@ -1,0 +1,8 @@
+{% extends 'admin/change_list.html' %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+{# This makes use of some hacky javascript to replace the default "actions" dropdown list with more user-friendly buttons for each action. #}
+<script type="text/javascript" src="{% static 'action_buttons.js' %}"></script>
+{% endblock %}
