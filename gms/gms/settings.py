@@ -11,9 +11,6 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 # import local settings
 from gms.settings_local import *
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
 # Application definition
 
 INSTALLED_APPS = (
@@ -87,13 +84,16 @@ TEMPLATES = [
     },
 ]
 
+TEMPLATE_DEBUG = DEBUG
+
 from django.contrib.messages import constants as message_constants
 MESSAGE_LEVEL = message_constants.DEBUG
 
+### Logging configuration ###
 import logging
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
         'standard': {
             'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
@@ -101,38 +101,38 @@ LOGGING = {
         },
     },
     'handlers': {
-        # 'logfile': {
-        #     'level':'DEBUG',
-        #     'class':'logging.handlers.RotatingFileHandler',
-        #     'filename': SITE_ROOT + "/logfile",
-        #     'maxBytes': 50000,
-        #     'backupCount': 2,
-        #     'formatter': 'standard',
-        # },
+        'logfile': {
+            'level': LOG_LEVEL,    
+            'class':'logging.handlers.RotatingFileHandler',
+            'filename': LOG_FILENAME,
+            'maxBytes': 500000,
+            'backupCount': 2,
+            'formatter': 'standard',
+        },                                     
         'console':{
-            'level':'INFO',
+            'level': LOG_LEVEL,
             'class':'logging.StreamHandler',
             'formatter': 'standard'
         },
     },
     'loggers': {
         'django': {
-            'handlers':['console'],
+            'handlers':['logfile', 'console'],
             'propagate': True,
-            'level':'DEBUG',
+            'level': LOG_LEVEL,
         },
         'django.db.backends': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
+            'handlers': ['logfile', 'console'],
+            'level': LOG_LEVEL,
             'propagate': False,
         },
         'django.contrib.auth': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
+            'handlers': ['logfile', 'console'],
+            'level': LOG_LEVEL,
         },
         'django_auth_ldap': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'handlers': ['logfile', 'console'],
         },
     },
 }
