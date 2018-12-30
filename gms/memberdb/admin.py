@@ -121,35 +121,21 @@ class MembershipAdmin(ButtonActionModelAdmin):
     member_actions.allow_tags = True
 
     def process_approve(self, request, *args, **kwargs):
-        #breakpoint();
-        #member = self.get_object(request, member_id)
-        #return MembershipApprovalAdminView.as_view(member=member, admin=self)(request, *args, **kwargs)
         return MembershipApprovalAdminView.as_view(admin=self)(request, *args, **kwargs)
-        """
-        if request.method != 'POST':
-            form = MembershipApprovalForm(instance=member)
-        else:
-            form = MembershipApprovalForm(request.POST, instance=member)
-            if form.is_valid():
-                form.save()
 
-                self.message_user(request, 'Approve success')
-                url = reverse(
-                    'admin:memberdb_member_change',
-                    args=[member.pk],
-                    current_app=self.admin_site.name,
-                )
-                return HttpResponseRedirect(url)
+"""
+Register multiple ModelAdmins per model. See https://stackoverflow.com/questions/2223375/multiple-modeladmins-views-for-same-model-in-django-admin/2228821
+"""
+class ProxyMembership(Membership):
+    class Meta:
+        proxy = True
 
-        context = self.admin_site.each_context(request)
-        context['opts'] = self.model._meta
-        context['member'] = member
-        context['form'] = form
-
-        return render(request, 'admin/memberdb/membership_approve.html', context)
-        """
+class PendingMembershipAdmin(MembershipAdmin):
+    def get_queryset(self, request):
+        return self.model.objects.filter(approved__exact=False)
 
 # Register the other models with either default admin site pages or with optional customisations
 admin.site.register(Member, MemberAdmin)
 admin.site.register(IncAssocMember, IAMemberAdmin)
 admin.site.register(Membership, MembershipAdmin)
+#admin.site.register(ProxyMembership, PendingMembershipAdmin)
