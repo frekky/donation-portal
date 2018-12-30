@@ -9,7 +9,7 @@ Stuff to do
 
 - Important structural TODO:
     - Design database schema for rolling memberships [done]
-    - Build member-facing initial registration form [done, but really ugly]
+    - Build member-facing initial registration form [done]
     - Build door-facing pending membership approval form [done]
     - Build member-facing post-approval (or post-email-confirmation) registration form
     - Build member-facing renewal form
@@ -17,12 +17,12 @@ Stuff to do
     - Administrative user authentication via LDAP/AD [done]
     - Automatic member account creation (after membership approved)
 
-Eventual / Conceptual Workflow Design
--------------------------------------
+Workflow Design
+---------------
 
 - __Use case 1: new member__:
     1. New member enters details on registration form, submits
-        - Gets confirmation email (maybe with link to click to confirm the email address?)
+        - Gets confirmation email to the effect of "your membership is pending"
     2. Door member logs in and verifies that details are correct, manages payment
         - Cash: door member takes cash and enters amount paid by cash
         - Card (in person): door member enters amount to charge, processed via Square App or custom POS app (Android)
@@ -32,6 +32,7 @@ Eventual / Conceptual Workflow Design
         - Pending memberships are saved into the main members table
         - Account is created in AD/dispense using provided details
         - Update dispense with payment information after account creation - transfer money from `uccportal` account to `$newuser` account (for example)
+        - User gets email with link to login & change details
     4. New member gets notification (ie. email), clicks link to set password
 - __Use case 2: existing member__ (possibly with locked account):
     1. Existing member (with existing AD/LDAP account) logs in and enters details on renewal/registration form (or confirms existing stored details are correct)
@@ -51,6 +52,7 @@ Environment Setup
 - `cd uccportal`
 - `virtualenv env`
 - Every time you want to do some uccportal development, do `source env/bin/activate` to set up your environment
+- Install packages needed by pip to build python dependencies: `apt-get install build-essential libldap2-dev libsasl2-dev`
 - Install python dependencies to local environment: `pip install -r pip-packages.txt`
 - Configure django: `cp gms/gms/settings_local.example.py gms/gms/settings_local.py`
     - Edit `gms/gms/settings_local.py` and check that the database backend is configured correctly. (sqlite3 is fine for development)
