@@ -43,7 +43,7 @@ Workflow Design
     4. Renewing member gets email confirming payment / renewal success
         - confirmation link to reactivate account? should this happen between steps 1-2?
 
-Environment Setup
+Environment Setup <a name="envsetup"></a>
 -----------------
 
 - This project uses Python 3.7
@@ -62,33 +62,102 @@ Environment Setup
 
 -----------------------------------------------------------
 
-GETTING STARTED EACH YEAR [DEPRECATED]
---------------------------------------
+Deployment under Apache on Debian
+---------------------------------
 
-To set up a new database,
+This works for Apache 2.4 or above using `mod_wsgi` compiled with Python 3 support.
+If the apache version is too low or it already uses `mod_wsgi` for Python 2 then
+you should probably give up on that installation and make a new one.
+
+This also assumes you have configured HTTPS certificates already and that apache2
+is configured to run as an unprivileged user (ie. `www-data`)
+
+1. Install the packages:
+    `apt-get install apache2 libapache2-mod-wsgi-py3 git build-essential libldap2-dev libsasl2-dev`
+2. Checkout the git repository somewhere (ie. in `/services/uccportal`):
+    `git clone https://gitlab.ucc.asn.au/frekky/uccportal /services/uccportal`
+3. Put something like the following in `/etc/apache2/sites-available/uccportal.conf`:
+```
+<VirtualHost *:443>
+    ServerAdmin wheel@ucc.gu.uwa.edu.au
+    ServerName portal.ucc.gu.uwa.edu.au
+    ServerAlias portal.ucc.guild.uwa.edu.au
+    ServerAlias portal.ucc.asn.au
+
+    DocumentRoot /services/uccportal/wwwroot
+
+    <Directory /services/uccportal/wwwroot>
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    WSGIDaemonProcess uccportal python-home=/services/uccportal/env python-path=/services/uccportal/gms
+    WSGIProcessGroup uccportal
+    WSGIScriptAlias / /services/uccportal/gms/gms/wsgi.py
+
+    <Directory /services/uccportal/gms/gms>
+        <Files wsgi.py>
+            Require all granted
+        </Files>
+    </Directory>
+
+    Protocols h2 http:/1.1
+
+    <Directory /services/uccportal/gms/static>
+        Require all granted
+    </Directory>
+
+    Alias /media /services/uccportal/gms/static
+
+    SSLEngine On
+    SSLCertificateFile /etc/letsencrypt/live/portal.ucc.asn.au/cert.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/portal.ucc.asn.au/privkey.pem
+    SSLCertificateChainFile /etc/letsencrypt/live/portal.ucc.asn.au/chain.pem
+
+    ErrorLog ${APACHE_LOG_DIR}/uccportal/error.log
+    CustomLog ${APACHE_LOG_DIR}/uccportal/access.log combined
+</VirtualHost>
+```
+4. Configure django.
+    - Follow the steps from [Environment Setup](#envsetup)
+    - `chmod 640 /services/uccportal/gms/gms/settings_local.py`
+    - `chgrp -R www-data /services/uccportal/`
+    - `mkdir /var/log/apache2/uccportal && chgrp www-data /var/log/apache2/uccportal && chmod 775 /var/log/apache2/uccportal && chmod o+x /var/log/apache2`
+    - Put the static files in the correct location for apache2 to find them:
+        - `gms/manage.py collectstatic`
+
+
+Configuring the database backend
+--------------------------------
+
+To set up a the database,
 
 (as root on mussel)
 ```
 mussel:~# su - postgres
 postgres@mussel:~$ psql
-postgres=# create database uccmemberdb_20XX;
-postgres=# GRANT ALL on DATABASE uccmemberdb_20XX to uccmemberdb;
+postgres=# create database uccportal;
+postgres=# CREATE USER uccportal WITH ENCRYPTED PASSWORD 'insert-password-here';
+postgres=# GRANT ALL on DATABASE uccportal to uccportal;
 ```
 
-Adjust /services/gms/gms/settings_local.py to point to the new database (usually
+Adjust `/services/uccportal/gms/gms/settings_local.py` to point to the new database (usually
 changing the databse name is enough).
 
-If you want to make changes to the data you collect, now is the time to do it.
 
-Edit /service/gms/memberdb/models.py
-In /services/gms, run `python manage.py makemigrations` to prepare the databae
+Making changes to data being collected
+--------------------------------------
+
+Edit `/service/uccportal/gms/memberdb/models.py`
+In `/services/uccportal/gms`, run `./manage.py makemigrations` to prepare the databae
 updates.
 
 ```
-mussel:~# cd /services/gms/
-mussel:/services/gms# python manage.py validate
-0 errors found
-mussel:/services/gms# python manage.py syncdb
+uccportal:~# cd /services/uccportal/gms/
+uccportal:/services/uccportal/gms# ./manage.py check
+System check identified no issues (0 silenced).
+uccportal:/services/uccportal/gms# ./manage.py migrate --run-syncdb
 
 ...
 You just installed Django's auth system, which means you don't have any
@@ -96,13 +165,13 @@ You just installed Django's auth system, which means you don't have any
 Would you like to create one now? (yes/no): no
 
 Now restart MemberDB by runing
-mussel:/services/gms# touch gms/wsgi.wsgi
+uccportal:/services/uccportal/gms# touch gms/wsgi.py
 ```
 
 Now go ahead and log in to the website. It will be totally fresh, with all
-committee members being made superusers on first login.
+committee, door and wheel members being made superusers on first login.
 
-If you would like to allow non-committee users to help out with data entry,
+If you would like to allow other users to help out with data entry,
 ask them to log in. After the login attempt is denied, you will be able to
 find their name in the Auth/Users area of the site. Turn on their staff status
 and allow them access to the memberdb permissions.
