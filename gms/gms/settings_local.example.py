@@ -85,3 +85,8 @@ AUTH_LDAP_USER_FLAGS_BY_GROUP = {
     # superusers have all permissions (but also need staff to login to admin site)
     "is_superuser": ADMIN_ACCESS_QUERY,
 }
+
+# the Square app and location data (set to sandbox unless you want it to charge people)
+SQUARE_APP_ID = 'maybe-sandbox-something-something-here'
+SQUARE_LOCATION = 'CBASEDE-this-is-probably-somewhere-in-Sydney'
+SQUARE_ACCESS_TOKEN = 'keep-this-very-secret'

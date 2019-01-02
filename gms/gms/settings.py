@@ -14,6 +14,7 @@ from gms.settings_local import *
 # Application definition
 
 INSTALLED_APPS = (
+    'sslserver',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -22,6 +23,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'memberdb',
     'import_members',
+    'squarepay',
 )
 
 MIDDLEWARE = [
