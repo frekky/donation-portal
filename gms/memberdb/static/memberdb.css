@@ -2,18 +2,6 @@ html {
     height: 100%;
 }
 
-body {
-    min-height: 100%;
-    position: relative;
-    background-color: #f8f8f8;
-    font-family: Arial, Helvetica, sans-serif;
-    margin: 0;
-}
-
-* {
-    box-sizing: border-box;
-}
-
 #content {
     width: 80%;
     margin: 0 10%;
@@ -111,10 +99,6 @@ ul.errorlist {
     font-weight: bold;
 }
 
-.logo {
-    margin: 5px 30px 5px 20px;
-}
-
 nav {
     background-color: #333;
     height: 60px;
@@ -141,21 +125,4 @@ nav {
 
 .navtab:last-child {
     border-right: 1.5px solid #555;
-}
-
-#container {
-    padding-bottom: 60px;
-}
-
-#footer {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    clear: both;
-    background-color: #ccc;
-    color: #777;
-    text-align: center;
-    overflow: hidden;
-    z-index: -1;
 }

@@ -1,9 +1,22 @@
 /* memberdb: css used by both main site & admin pages 
  * some of this is just copied from the admin css */
 
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100%;
+    position: relative;
+    background-color: #f8f8f8;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    margin: 0;
+}
+
 .logo {
     float: left;
-    margin: -5px 10px;
+    margin: 5px 30px 5px 20px;
     height: 50px;
     width: 50px;
     background-image: url("ucc-logo-white.png");
@@ -11,6 +24,29 @@
     background-position: center;
     background-size: cover;
 }
+
+#container {
+    padding-bottom: 60px;
+    position: static;
+}
+
+#footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    clear: both;
+    background-color: #ccc;
+    color: #777;
+    text-align: center;
+    overflow: hidden;
+    z-index: -1;
+}
+
+#footer p {
+    padding: 0;
+}
+
 
 /* MESSAGES & ERRORS */
 ul.messagelist {

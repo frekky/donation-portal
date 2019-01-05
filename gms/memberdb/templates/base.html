@@ -2,20 +2,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>{% block title %}{% endblock %}</title>
-<link rel="stylesheet" type="text/css" href="{% static "shared.css" %}">
-<link rel="stylesheet" type="text/css" href="{% static "main.css" %}">
-<link rel="shortcut icon" type="image/png" href="{% static 'ucc-logo.png' %}"/>
-{% block extrahead %}{% endblock %}
-{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
+    <!-- MemberDB base template -->
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'ucc-logo.png' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static "memberdb.css" %}">
+    {% block prestyle %}{% endblock %}
+    <link rel="stylesheet" type="text/css" href="{% static "shared.css" %}">
+    {% block extrahead %}{% endblock %}
+    {% block extrastyle %}{% endblock %}
+    {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
 </head>
 
-<body>
+<body {% block bodyattrs %}{% endblock %}>
 
 <!-- Container -->
 <div id="container">
 
-    <!-- Header -->
+    {% block header_div %}<!-- Header -->
     <div id="header">
         {% block navbar %}
         <nav>
@@ -32,7 +35,7 @@
             <a class="navtab {% if url_name == 'home' %}active{% endif %}" href="{% url "memberdb:home" %}">Member home</a>
             <a class="navtab {% if url_name == 'renew' %}active{% endif %}" href="{% url "memberdb:renew" %}">Renew membership</a>
             {% if request.user.is_staff %}
-            <a class="navtab" href="{% url "admin:index" %}">Admin site</a>
+            <a class="navtab {% block adminactive %}{% endblock %}" href="{% url "admin:index" %}">Admin site</a>
             {% endif %}
             <a class="navtab {% if url_name == 'logout' %}active{% endif %}" href="{% url "memberdb:logout" %}">Logout</a>
             {% endif %}
@@ -48,13 +51,17 @@
         {% endfor %}</ul>
         {% endif %}{% endblock messages %}
     </div>
-    <!-- END Header -->
+    {% endblock %}<!-- END Header -->
 
     <!-- Content -->
     <div id="content">
+        {% block pretitle %}{% endblock %}
         {% block content_title %}{% endblock %}
         {% block content %}
         {% endblock %}
+        <!-- sidebar -->
+        {% block sidebar %}{% endblock %}
+        <br class="clear">
     </div>
     <!-- END Content -->
 

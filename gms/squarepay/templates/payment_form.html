@@ -5,17 +5,14 @@
 <!-- link to the SqPaymentForm library -->
 <script type="text/javascript" src="https://js.squareup.com/v2/paymentform"></script>
 
-<script type="text/javascript">
-/* {# bring the location IDs into javascript so the next bits know about them #} */
+{# bring the location IDs into javascript so the next bits know about them #}
+<script type="text/javascript"> 
 var applicationId = "{{ app_id }}";
 var locationId = "{{ loc_id }}";
 </script>
 
-<!-- link to the local SqPaymentForm initialization -->
-<script type="text/javascript" src="{% static 'sqpaymentform-basic.js' %}"></script>
-
-<!-- link to the custom styles for SqPaymentForm -->
-<link rel="stylesheet" type="text/css" href="{% static 'sqpaymentform-basic.css' %}">
+<script type="text/javascript" src="{% static 'squarepay.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'squarepay.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -48,22 +45,26 @@ var locationId = "{{ loc_id }}";
     <form id="nonce-form" novalidate action="{% url 'squarepay:pay' %}" method="post">
     {% csrf_token %}
     <fieldset>
-        <span class="label">Card Number</span>
-        <div id="sq-card-number"></div>
-
-        <div class="third">
-        <span class="label">Expiration</span>
-        <div id="sq-expiration-date"></div>
+        <div class="form-row">
+            <span class="label">Card Number</span>
+            <div id="sq-card-number"></div>
         </div>
 
-        <div class="third">
-        <span class="label">CVV</span>
-        <div id="sq-cvv"></div>
-        </div>
+        <div class="form-row">
+            <div class="third">
+            <span class="label">Expiration</span>
+            <div id="sq-expiration-date"></div>
+            </div>
 
-        <div class="third">
-        <span class="label">Postal</span>
-        <div id="sq-postal-code"></div>
+            <div class="third">
+            <span class="label">CVV</span>
+            <div id="sq-cvv"></div>
+            </div>
+
+            <div class="third">
+            <span class="label">Postcode</span>
+            <div id="sq-postal-code"></div>
+            </div>
         </div>
     </fieldset>
 

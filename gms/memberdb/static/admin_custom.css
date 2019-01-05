@@ -3,8 +3,6 @@
 }
 
 .logo {
-    margin-left: 0px;
-    margin-right: 15px;
     transform: rotate(45deg);
 }
 
@@ -21,4 +19,21 @@
 #content-related.wide {
     width: 400px;
     margin-right: -440px;
+}
+
+#header {
+    padding: 0;
+    height: auto;
+}
+
+#admin-header {
+    padding: 0px 40px;
+}
+
+#admin-header, #container {
+    overflow: auto;
+}
+
+.button {
+    display: inline-block;
 }
