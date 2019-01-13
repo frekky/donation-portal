@@ -14,17 +14,17 @@ html {
     transform: translate(-50%, -50%);
 }
 
-.form-container, #form-container {
+.form-container {
     background-color: #ffe;
     border: 2px solid #8fc;
     border-radius: 5px;
     padding: 20px;
-    margin: 10px;
+    margin: 20px;
 }
 
 .form-header {
     text-align: center;
-    padding: 10px 10px 20px 10px;
+    /*padding: 10px 10px 20px 10px;*/
 }
 
 .form-header .tips {
@@ -34,9 +34,15 @@ html {
     border-radius: 10px;
     background-color: #feb;
     padding: 10px 10px 7px 10px;
+    margin: 10px 10px 20px 10px;
     display: inline-block;
     text-align: center;
     line-height: 23px;
+}
+
+.form-header .tips.error {
+    color: #000;
+    background-color: rgb(255, 145, 0);
 }
 
 fieldset {

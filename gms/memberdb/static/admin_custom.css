@@ -37,3 +37,7 @@
 .button {
     display: inline-block;
 }
+
+p, a {
+    box-sizing: content-box;
+}
