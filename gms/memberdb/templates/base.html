@@ -3,7 +3,7 @@
 <html>
 <head>
     <!-- MemberDB base template -->
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}UCC MemberDB{% endblock %}</title>
     <link rel="shortcut icon" type="image/png" href="{% static 'ucc-logo.png' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static "memberdb.css" %}">
     {% block prestyle %}{% endblock %}
@@ -23,7 +23,7 @@
         {% block navbar %}
         <nav>
             {% block branding %}
-            <a class="logo" href="https://ucc.asn.au"></a>
+            <a class="logo" title="UCC logo"></a>
             {% endblock %}
             
             {# fancy automatic navbar thing from https://stackoverflow.com/questions/39639264 #}
@@ -56,7 +56,7 @@
     <!-- Content -->
     <div id="content">
         {% block pretitle %}{% endblock %}
-        {% block content_title %}{% endblock %}
+        {% block content_title %}<h1></h1>{% endblock %}
         {% block content %}
         {% endblock %}
         <!-- sidebar -->
@@ -72,6 +72,12 @@
             The University Computer Club Inc.
             ABN: 98 843 368 069
         </p>
+        <div class="linkslist">
+            <a href="https://www.ucc.asn.au">main website</a>&#8226;
+            <a href="https://wiki.ucc.asn.au">UCC wiki</a>&#8226;
+            <a href="https://www.ucc.asn.au/aboutucc/contact.ucc">contact us</a>&#8226;
+            <a href="https://gitlab.ucc.asn.au/frekk/uccportal">source code</a>
+        </div>
     </div>
     {% endblock %}
     <!-- END Footer -->    
