@@ -1,5 +1,6 @@
 /** Javascript to handle the Square payments form.
- * Adapted from https://docs.connect.squareup.com/payments/sqpaymentform/setup */
+ * Adapted from https://docs.connect.squareup.com/payments/sqpaymentform/setup
+ * SqPaymentForm documentation at https://docs.connect.squareup.com/api/paymentform */
 
 /*
  * function: requestCardNonce
@@ -41,20 +42,10 @@ var paymentForm = new SqPaymentForm({
         _mozOsxFontSmoothing: 'grayscale'
     }],
 
-    // Initialize Apple Pay placeholder ID
-    applePay: {
-        elementId: 'sq-apple-pay'
-    },
-
-    // Initialize Masterpass placeholder ID
-    masterpass: {
-        elementId: 'sq-masterpass'
-    },
-
-    // Initialize Google Pay placeholder ID
-    googlePay: {
-        elementId: 'sq-google-pay'
-    },
+    /* digital wallets are only supported by Square for accounts in the US :'( */
+    applePay: false,
+    masterpass: false,
+    googlePay: false,
 
     // Initialize the credit card placeholders
     cardNumber: {
@@ -69,43 +60,15 @@ var paymentForm = new SqPaymentForm({
         elementId: 'sq-expiration-date',
         placeholder: 'MM/YY'
     },
-    postalCode: {
-        elementId: 'sq-postal-code',
-        placeholder: '6009'
-    },
+
+    /* postal code is not required in AU */
+    postalCode: false,
 
     // SqPaymentForm callback functions
     callbacks: {
-        /* callback function: methodsSupported
-         * Triggered when: the page is loaded. */
-        methodsSupported: function (methods) {
-            var walletBox = document.getElementById('sq-walletbox');
-            var applePayBtn = document.getElementById('sq-apple-pay');
-            var googlePayBtn = document.getElementById('sq-google-pay');
-            var masterpassBtn = document.getElementById('sq-masterpass');
-
-            // Only show the button if Apple Pay for Web is enabled
-            // Otherwise, display the wallet not enabled message.
-            if (methods.applePay === true) {
-                walletBox.style.display = 'block';
-                applePayBtn.style.display = 'block';
-            }
-            // Only show the button if Masterpass is enabled
-            // Otherwise, display the wallet not enabled message.
-            if (methods.masterpass === true) {
-                walletBox.style.display = 'block';
-                masterpassBtn.style.display = 'block';
-            }
-            // Only show the button if Google Pay is enabled
-            if (methods.googlePay === true) {
-                walletBox.style.display = 'block';
-                googlePayBtn.style.display = 'inline-block';
-            }
-        },
-
         /* callback function: createPaymentRequest
          * Triggered when: a digital wallet payment button is clicked. */
-        createPaymentRequest: function () {
+/*        createPaymentRequest: function () {
 
             return {
                 requestShippingAddress: false,
@@ -125,27 +88,16 @@ var paymentForm = new SqPaymentForm({
                     }
                 ]
             }
-        },
-
-        /* callback function: validateShippingContact
-         * Triggered when: a shipping address is selected/changed in a digital
-         *                                 wallet UI that supports address selection. */
-        validateShippingContact: function (contact) {
-
-            var validationErrorObj;
-            /* ADD CODE TO SET validationErrorObj IF ERRORS ARE FOUND */
-            return validationErrorObj;
-        },
+        },*/
 
         /* callback function: cardNonceResponseReceived
          * Triggered when: SqPaymentForm completes a card nonce request */
         cardNonceResponseReceived: function (errors, nonce, cardData) {
             if (errors) {
                 // Log errors from nonce generation to the Javascript console
-                console.log("Encountered errors:");
+                console.log("cardNonceResponseReceived encountered errors:");
                 errors.forEach(function (error) {
                     console.log('    ' + error.message);
-                    alert(error.message);
                 });
 
                 return;
@@ -155,7 +107,6 @@ var paymentForm = new SqPaymentForm({
 
             // POST the nonce form to the payment processing page
             document.getElementById('nonce-form').submit();
-
         },
 
         /* callback function: unsupportedBrowserDetected
@@ -167,6 +118,7 @@ var paymentForm = new SqPaymentForm({
         /* callback function: inputEventReceived
          * Triggered when: visitors interact with SqPaymentForm iframe elements. */
         inputEventReceived: function (inputEvent) {
+            var e = document.getElementById("error");
             switch (inputEvent.eventType) {
                 case 'focusClassAdded':
                     /* HANDLE AS DESIRED */
@@ -175,11 +127,12 @@ var paymentForm = new SqPaymentForm({
                     /* HANDLE AS DESIRED */
                     break;
                 case 'errorClassAdded':
-                    document.getElementById("error").innerHTML = "Please fix card information errors before continuing.";
+                    e.innerHTML = "Please fix card information errors before continuing.";
+                    e.style.display = "block";
                     break;
                 case 'errorClassRemoved':
                     /* HANDLE AS DESIRED */
-                    document.getElementById("error").style.display = "none";
+                    e.style.display = "none";
                     break;
                 case 'cardBrandChanged':
                     /* HANDLE AS DESIRED */
@@ -195,13 +148,19 @@ var paymentForm = new SqPaymentForm({
         paymentFormLoaded: function () {
             /* HANDLE AS DESIRED */
             console.log("The form loaded!");
+            btn = document.getElementById("sq-creditcard");
+            btn.disabled = false;
         }
     }
 });
 
 document.addEventListener("DOMContentLoaded", function(event) {
-    if (SqPaymentForm.isSupportedBrowser()) {
+    /* for testing, you can add ...?unsupported to the URL */
+    if (SqPaymentForm.isSupportedBrowser() && !window.location.href.includes("unsupported")) {
+        console.log("loading Square payment form...");
         paymentForm.build();
         paymentForm.recalculateSize();
+    } else {
+        console.log("not loading form: unsupported browser!");
     }
 });

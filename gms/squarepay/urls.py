@@ -4,5 +4,5 @@ from .views import PaymentFormView
 
 app_name = 'squarepay'
 urlpatterns = [
-    path('pay/', PaymentFormView.as_view(), name='pay'),
+    path('pay/<int:pk>/<str:token>/', PaymentFormView.as_view(), name='pay'),
 ]

@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block title %}UCC Payment Gateway{% endblock %}
+
 {% block extrahead %}
 <!-- link to the SqPaymentForm library -->
 <script type="text/javascript" src="https://js.squareup.com/v2/paymentform"></script>
@@ -9,74 +11,67 @@
 <script type="text/javascript"> 
 var applicationId = "{{ app_id }}";
 var locationId = "{{ loc_id }}";
+var amount = {{ payment.amount }};
 </script>
 
 <script type="text/javascript" src="{% static 'squarepay.js' %}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'squarepay.css' %}">
 {% endblock %}
 
+
+{% block content_title %}<h1>Pay with card</h1>{% endblock %}
 {% block content %}
-{% if response %}
-<h1>{{ response }}</h1>
-{% endif %}
-
-<div id="form-container">
-<div id="sq-walletbox">
-    <!-- Placeholder for Apple Pay for Web button -->
-    <button id="sq-apple-pay"></button>
-
-    <!-- Placeholder for Masterpass button -->
-    <button id="sq-masterpass"></button>
-
-    <!-- Placeholder for Google Pay button-->
-    <button id="sq-google-pay" class="button-google-pay"></button>
-
-    <div id="sq-walletbox-divider">
-    <span id="sq-walletbox-divider-label">Or</span>
-    <hr />
-    </div>
+<div class="form-container">
+<div class="form-header">
+    <span class="tips">{% block tips %}<b><i>Please fill in your card details below.</i></b>{% endblock %}</span>
+    {% if payment.is_paid %}<span class="tips">
+       <p><b>It appears you have already successfully attempted this payment.</b><br><br>
+        Note that you will not be charged twice if even you submit again.</p>
+    </span>{% endif %}
+    <noscript>
+        <span class="tips error">Please enable javascript to use the payment form.</span>
+    </noscript>
 </div>
-<div id="sq-ccbox">
-    <!--
-    Be sure to replace the action attribute of the form with the path of
-    the Transaction API charge endpoint URL you want to POST the nonce to
-    (for example, "/process-card")
-    -->
-    <form id="nonce-form" novalidate action="{% url 'squarepay:pay' %}" method="post">
-    {% csrf_token %}
-    <fieldset>
-        <div class="form-row">
-            <span class="label">Card Number</span>
-            <div id="sq-card-number"></div>
-        </div>
+<!-- the element #form-container is used to create the Square payment form (hardcoded) -->
+<div id="form-container">
 
-        <div class="form-row">
-            <div class="third">
-            <span class="label">Expiration</span>
-            <div id="sq-expiration-date"></div>
+    <div id="sq-ccbox">
+        <!--
+        Be sure to replace the action attribute of the form with the path of
+        the Transaction API charge endpoint URL you want to POST the nonce to
+        (for example, "/process-card")
+        -->
+        <form id="nonce-form" novalidate action="#" method="post">
+        {% csrf_token %}
+        <div id="error"></div>
+
+        <fieldset>
+            <div class="form-row">
+                <span class="label">Card Number</span>
+                <div id="sq-card-number"></div>
             </div>
 
-            <div class="third">
-            <span class="label">CVV</span>
-            <div id="sq-cvv"></div>
+            <div class="form-row">
+                <div class="half">
+                <span class="label">Expiration</span>
+                <div id="sq-expiration-date"></div>
+                </div>
+
+                <div class="half">
+                <span class="label">CVV</span>
+                <div id="sq-cvv"></div>
+                </div>
             </div>
+        </fieldset>
+        <button id="sq-creditcard" class="button-credit-card" onclick="requestCardNonce(event)" disabled>Pay with card</button>
 
-            <div class="third">
-            <span class="label">Postcode</span>
-            <div id="sq-postal-code"></div>
-            </div>
-        </div>
-    </fieldset>
-
-    <button id="sq-creditcard" class="button-credit-card" onclick="requestCardNonce(event)">Pay $1.00</button>
-
-    <div id="error"></div>
-
-    <!--
-        After a nonce is generated it will be assigned to this hidden input field.
-    -->
-    <input type="hidden" id="card-nonce" name="nonce">
-    </form>
-</div> <!-- end #sq-ccbox -->
+        <!--
+            After a nonce is generated it will be assigned to this hidden input field.
+        -->
+        <input type="hidden" id="card-nonce" name="nonce">
+        </form>
+    </div> <!-- end #sq-ccbox -->
 </div> <!-- end #form-container -->
+</div>
+</div>
 {% endblock %}

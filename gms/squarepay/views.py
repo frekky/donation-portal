@@ -1,6 +1,6 @@
 import uuid
-from django.shortcuts import render
-from django.views.generic.base import TemplateView
+from django.views.generic.detail import DetailView
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib import messages
 from django.conf import settings
 
@@ -9,26 +9,28 @@ from squareconnect.rest import ApiException
 from squareconnect.apis.transactions_api import TransactionsApi
 from squareconnect.apis.locations_api import LocationsApi
 
-class PaymentFormView(TemplateView):
+from .models import CardPayment
+
+class PaymentFormView(DetailView):
     """
     Handles the backend stuff for the Square payment form.
     See https://docs.connect.squareup.com/payments/sqpaymentform/setup
     """
 
     template_name = 'payment_form.html'
-    methods = ['get', 'post']
 
-    app_id = None
-    loc_id = None
-    access_key = None
-    amount = None
-    idempotency_key = None
-    sqapi = None
-    charge_response = None
+    app_id = None       # square app ID (can be accessed by clients)
+    loc_id = None       # square location key (can also be accessed by clients)
+    access_key = None   # this is secret
+    sqapi = None        # keep an instance of the Square API handy
 
+    model = CardPayment
+    slug_field = 'token'
+    slug_url_kwarg = 'token'
+    query_pk_and_slug = True
+    context_object_name = 'payment'
 
     def __init__(self, *args, **kwargs):
-        self.amount = kwargs.pop('payment_amount', 100)
         super().__init__(*args, **kwargs)
 
         # get things from settings
@@ -45,40 +47,36 @@ class PaymentFormView(TemplateView):
         context.update({
             'app_id': self.app_id,
             'loc_id': self.loc_id,
-            'response': self.charge_response,
         })
         return context
 
     def post(self, request, *args, **kwargs):
         nonce = request.POST.get('nonce', None)
         if (nonce is None or nonce == ""):
-            messages.error(request, "No nonce was passed or invalid card data.")
+            messages.error(request, "No nonce was generated! Please try reloading the page and submit again.")
             return self.get(request)
 
         api_inst = TransactionsApi(self.sqapi)
 
-        # this can be reused so we don't double charge the customer
-        if (self.idempotency_key is None): 
-            self.idempotency_key = str(uuid.uuid1())
-        
         body = {
             'idempotency_key': self.idempotency_key,
             'card_nonce': nonce,
             'amount_money': {
-                'amount': self.amount,
+                'amount': amount,
                 'currency': 'AUD'
             }
         }
 
         try:
             api_response = api_inst.charge(self.loc_id, body)
-            self.charge_response = api_response.transaction
+            messages.success(request, "Your payment of %1.2f was successful.", amount)
         except ApiException as e:
-            self.charge_response = None
             messages.error(request, "Exception while calling TransactionApi::charge: %s" % e)
         
-        return self.get(request)
-
+        # redirect to success URL
+        if (self.object.completed_url is None):
+            return self.get(request)
+        return HttpResponseRedirect(self.object.completed_url)
 
 
         
