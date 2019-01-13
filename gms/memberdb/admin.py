@@ -67,7 +67,7 @@ class MemberAdmin(admin.ModelAdmin):
 Define the admin page for viewing normal Member records (all details included) and approving them
 """
 class MembershipAdmin(admin.ModelAdmin):
-    list_display = ['membership_info', 'membership_type', 'payment_method', 'approved', 'date_submitted', 'member_actions']
+    list_display = ['membership_info', 'member_actions', 'membership_type', 'payment_method', 'approved', 'date_submitted', ]
     list_display_links = None
     list_filter = ['approved']
     readonly_fields = ['date_submitted']

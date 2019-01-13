@@ -16,14 +16,14 @@ def get_membership_type(member):
     best = None
     is_fresh = member.memberships.all().count() == 0
     for t in MEMBERSHIP_TYPES_:
-        if (t['must_be_fresh'] == is_fresh):
+        if (t['must_be_fresh'] == is_fresh and t['is_student'] == member.is_student and t['is_guild'] == member.is_guild):
             best = t
             break
         elif (t['is_student'] == member.is_student and t['is_guild'] == member.is_guild):
             best = t
             break
     if (best is None):
-        return MEMBERSHIP_TYPES_[0]['dispense']
+        return MEMBERSHIP_TYPES_[1]['dispense']
     else:
         return best['dispense']
 
