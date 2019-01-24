@@ -90,3 +90,12 @@ AUTH_LDAP_USER_FLAGS_BY_GROUP = {
 SQUARE_APP_ID = 'maybe-sandbox-something-something-here'
 SQUARE_LOCATION = 'CBASEDE-this-is-probably-somewhere-in-Sydney'
 SQUARE_ACCESS_TOKEN = 'keep-this-very-secret'
+
+DISPENSE_BIN = '/usr/local/bin/dispense'
+
+# configure the email backend (see https://docs.djangoproject.com/en/2.1/topics/email/)
+EMAIL_HOST = "secure.ucc.asn.au"
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = "uccportal"
+EMAIL_HOST_PASSWORD = "changeme"

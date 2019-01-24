@@ -33,6 +33,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'memberdb.views.MemberMiddleware',
 ]
 
 ROOT_URLCONF = 'gms.urls'
@@ -139,5 +140,9 @@ LOGGING = {
             'level': LOG_LEVEL,
             'handlers': ['logfile', 'console'],
         },
+        'squarepay': {
+            'level': LOG_LEVEL,
+            'handlers': ['logfile', 'console'],
+        }
     },
 }
