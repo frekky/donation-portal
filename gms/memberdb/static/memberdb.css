@@ -15,16 +15,11 @@ html {
 }
 
 .form-container {
-    background-color: #ffe;
-    border: 2px solid #8fc;
-    border-radius: 5px;
-    padding: 20px;
-    margin: 20px;
+    margin: 20px 0;
 }
 
-.form-header {
+.text-center, .form-header {
     text-align: center;
-    /*padding: 10px 10px 20px 10px;*/
 }
 
 .form-header .tips {
@@ -89,7 +84,7 @@ fieldset {
 }
 
 .help {
-    margin: 0 40px;
+    margin: 8px 8px 0 8px;
 }
 
 .help a {
@@ -107,7 +102,7 @@ ul.errorlist {
 
 nav {
     background-color: #333;
-    height: 60px;
+    overflow: auto; /* make navbar expand in case the tab buttons flow to a second row */
 }
 
 .navtab {
@@ -118,9 +113,12 @@ nav {
     font-size: 22px;
     font-variant-caps: all-petite-caps;
     font-weight: 400;
-    line-height: 40px;
-    padding: 10px 20px;
-    border-left: 1.5px solid #555;
+    line-height: 26px;
+    padding: 17px 20px; /* line-height and padding adds up to minimum 60px element height */
+    border-style: solid;
+    border-color: #555;
+    border-width: 0 1px 0 1px;
+    margin-right: -1px;
     background-color: #3c3c3c;
 }
 

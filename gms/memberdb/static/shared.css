@@ -58,6 +58,11 @@ body {
     color: #333;
 }
 
+/* make div expand to contain float children */
+.float-container {
+    overflow: auto;
+    display: inline-block;
+}
 
 
 
