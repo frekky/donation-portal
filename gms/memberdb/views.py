@@ -1,4 +1,5 @@
-from datetime import date
+from datetime import date, timedelta
+
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.urls import reverse
@@ -7,6 +8,7 @@ from django.contrib import messages
 from django.views.generic.base import View
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.mixins import AccessMixin
+from django.utils import timezone
 
 from .models import Member, IncAssocMember, Membership
 from .forms import MemberHomeForm
@@ -29,7 +31,7 @@ class MemberMiddleware:
         if request.user.is_authenticated:
             # get the username only when a user is logged in
             # note that request.user will still exist even when the user isn't logged in
-            request.member = Member.objects.filter(username__exact=self.request.user.username).first()
+            request.member = Member.objects.filter(username__exact=request.user.username).first()
 
             if request.member is not None:
                 # clean the member's auth token because they now have a working login
@@ -89,7 +91,7 @@ class MemberHomeView(MemberAccessMixin, MyUpdateView):
     form_class = MemberHomeForm
 
     def get_object(self):
-        return Member.objects.filter(username__exact=self.request.user.username).first()
+        return self.request.member
 
     def get_context_data(self):
         d = super().get_context_data()
@@ -104,17 +106,20 @@ class MemberHomeView(MemberAccessMixin, MyUpdateView):
         messages.warning(self.request, 'Could not update user display name in AD. Please try again once this feature has been implemented.')
 
         # redisplay the page
-        return self.get(request, *args, **kwargs)
+        return self.get(self.request)
 
 class MemberTokenView(View):
     """ allow a user to login using a unique (secure) member token """
     def get(self, request, **kwargs):
-        if not ('member_token' in kwargs and 'username' in kwargs) or user.is_authenticated:
+        if not ('member_token' in kwargs and 'username' in kwargs) or request.user.is_authenticated:
             raise Http404()
 
-        # look up the member using exact match for token and username
-        member = Member.objects.get(token=kwargs['member_token'], username=kwargs['username'])
+        # look up the member using exact match for token and username, and registered < 7 days ago
+        week_ago = timezone.now() - timedelta(days=7)
+
+        member = Member.objects.get(login_token=kwargs['member_token'], username=kwargs['username'], created__gte=week_ago)
         if member is None:
             raise Http404()
+
         request.session['member_id'] = member.id
         return HttpResponseRedirect(reverse('memberdb:home'))

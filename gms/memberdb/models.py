@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import F
 from django.core.validators import RegexValidator
+from django.core.management.utils import get_random_string
 
 from squarepay.dispense import get_item_price
 
@@ -131,7 +132,7 @@ class Member (IncAssocMember):
     phone_number    = models.CharField ('Phone number', max_length=20, blank=False, validators=[RegexValidator(regex='^\+?[0-9() -]+$')])
     is_student      = models.BooleanField ('Student', default=True, blank=True, help_text="Tick this box if you are a current student at a secondary or tertiary institution in WA")
     is_guild        = models.BooleanField ('UWA Guild member', default=True, blank=True)
-    id_number       = models.CharField ('Student email or Drivers License', max_length=255, blank=False, help_text="Student emails should end with '.edu.au' and drivers licences should be in the format '[WA]DL 1234567'")
+    id_number       = models.CharField ('Student email or Drivers License', max_length=255, blank=False, help_text="Student emails should end with '@student.*.edu.au' and drivers licences should be in the format '<AU state> 1234567'")
     member_updated  = models.DateTimeField ('Internal UCC info last updated', auto_now=True)
     login_token     = models.CharField ('Temporary access key', max_length=128, null=True, editable=False, default=make_token)
 

@@ -60,8 +60,6 @@ class RegisterForm(MyModelForm):
         # now create a corresponding Membership (marked as pending / not accepted, mostly default values)
         ms = make_pending_membership(m)
 
-        # make a card payment thing as well
-
         if (commit):
             ms.save();
         return m, ms
@@ -97,8 +95,21 @@ class RegisterView(MyUpdateView):
     def form_valid(self, form):
         # save the member data and get the Member instance
         m, ms = form.save()
-        #messages.success(self.request, 'Your registration has been submitted.')
-        return
+        messages.success(self.request, 'Your registration has been submitted.')
+
+        # set the member session info
+        self.request.session['member_id'] = m.id
+        return thanks_view(self.request, m, ms)
+
+def thanks_view(request, member, ms):
+    """ display a thankyou page after registration is completed """
+    context = {
+        'member': member,
+        'ms': ms,
+        'login_url': reverse('memberdb:login_member', kwargs={'username': member.username, 'member_token': member.login_token}),
+    }
+    return render(request, 'thanks.html', context)
+
 
 class RenewView(LoginRequiredMixin, MyUpdateView):
     template_name = 'renew.html'

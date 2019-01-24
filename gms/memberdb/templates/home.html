@@ -2,6 +2,7 @@
 {% block title %}UCC Member Home{% endblock %}
 {% block content_title %}
     <h1>Member home</h1>
+    <h3>Welcome, {{ request.member.first_name }} {{ request.member.last_name }} ({{ request.member.username }})</h3>
 {% endblock %}
 
 {% block tips %}
@@ -16,7 +17,7 @@ You can see and modify some of your membership and account details below.
 {% block extra_preform %}
 <div class="form-row readonly">
     <label for="id_username">Username:</label>
-    <span class="text" id="id_username">{{ request.user.username }}</span>
+    <span class="text" id="id_username">{{ object.username }}</span>
 </div>
 {% endblock %}
 
