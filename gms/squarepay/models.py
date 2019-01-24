@@ -1,6 +1,5 @@
 import uuid
 
-from django.core.management.utils import get_random_string
 from django.db import models
 from django.urls import reverse
 
@@ -14,9 +13,6 @@ class CardPayment(models.Model):
     dispense_synced = models.BooleanField('Payment logged in dispense', blank=True, default=False)
     date_created    = models.DateTimeField('Date created', auto_now_add=True)
     date_paid       = models.DateTimeField('Date paid (payment captured)', null=True, blank=True)
-
-    def get_absolute_url(self):
-        return reverse('squarepay:pay', kwargs={ 'pk': self.pk, 'token': self.token })
 
 class MembershipPayment(CardPayment):
     """
