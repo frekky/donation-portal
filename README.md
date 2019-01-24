@@ -1,21 +1,25 @@
 uccportal - the UCC Computer Controlled Proletarian Organisational Roster That Accesses LDAP
 ============================================================================================
 
+This is designed to be the ultimate membership management suite for UCC. Signups are electronic and automatic, data is able to be conveniently stored in the member database and some of it is even automatically validated.
 
-TODO: This is designed to be the ultimate membership management suite for UCC. Signups are electronic and automatic, data is able to be conveniently stored in the member database and some of it is even automatically validated.
+Features
+--------
+
+- Written in Python 3 using [Django](https://www.djangoproject.com/)
+- Rolling membership database, retaining data from year to year
+- Registration form for new members to sign themselves up
+- Connects to Active Directory to authenticate existing users & allow them to renew their own membership
+- Administrative interface to approve pending memberships
 
 Stuff to do
 -----------
 
-- Important structural TODO:
-    - Design database schema for rolling memberships [done]
-    - Build member-facing initial registration form [done]
-    - Build door-facing pending membership approval form [done]
-    - Build member-facing post-approval (or post-email-confirmation) registration form
-    - Build member-facing renewal form
-- Stuff to do after structural bits
-    - Administrative user authentication via LDAP/AD [done]
-    - Automatic member account creation (after membership approved)
+- Online payment of membership fees using [Square Payments](https://squareup.com/au/)
+- Email confirmation & payment receipts
+- Automatic member account creation in Active Directory (after membership approved)
+- Validating student numbers in ID field (also via email)
+- Add dispense account balance with Square online payments
 
 Workflow Design
 ---------------
