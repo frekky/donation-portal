@@ -1,6 +1,13 @@
-Django==2.1.3
+certifi==2018.11.29
+Django==2.1.5
 django-auth-ldap==1.7.0
+django-sslserver==0.20
+psycopg2-binary==2.7.6.1
 pyasn1==0.4.4
 pyasn1-modules==0.2.2
+python-dateutil==2.7.5
 python-ldap==3.1.0
 pytz==2018.7
+six==1.12.0
+squareconnect==2.20181212.0
+urllib3==1.24.1
