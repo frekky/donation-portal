@@ -1,7 +1,7 @@
 from django.utils.html import format_html
 
 from gms import admin
-from .models import CardPayment
+from .models import CardPayment, MembershipPayment
 
 class CardPaymentAdmin(admin.ModelAdmin):
     list_display = ['amount', 'url_field', 'date_created', 'is_paid']
@@ -12,4 +12,8 @@ class CardPaymentAdmin(admin.ModelAdmin):
     url_field.short_description = 'Payment URL'
     url_field.allow_tags = True
 
+class MembershipPaymentAdmin(CardPaymentAdmin):
+    list_display = ['amount', 'url_field', 'date_created', 'is_paid', 'membership']
+
 admin.site.register(CardPayment, CardPaymentAdmin)
+admin.site.register(MembershipPayment, MembershipPaymentAdmin)

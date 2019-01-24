@@ -1,15 +1,15 @@
 import uuid
+from django.views.generic.base import RedirectView
 from django.views.generic.detail import DetailView
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib import messages
 from django.conf import settings
+from django.urls import reverse
+from django.utils import timezone
 
-import squareconnect
-from squareconnect.rest import ApiException
-from squareconnect.apis.transactions_api import TransactionsApi
-from squareconnect.apis.locations_api import LocationsApi
-
-from .models import CardPayment
+from .models import MembershipPayment, CardPayment
+from . import payments
+from .payments import try_capture_payment, set_paid
 
 class PaymentFormView(DetailView):
     """
@@ -18,11 +18,6 @@ class PaymentFormView(DetailView):
     """
 
     template_name = 'payment_form.html'
-
-    app_id = None       # square app ID (can be accessed by clients)
-    loc_id = None       # square location key (can also be accessed by clients)
-    access_key = None   # this is secret
-    sqapi = None        # keep an instance of the Square API handy
 
     model = CardPayment
     slug_field = 'token'
@@ -33,51 +28,58 @@ class PaymentFormView(DetailView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # get things from settings
-        self.app_id = getattr(settings, 'SQUARE_APP_ID', 'bad_config')
-        self.loc_id = getattr(settings, 'SQUARE_LOCATION', 'bad_config')
-        self.access_key = getattr(settings, 'SQUARE_ACCESS_TOKEN')
-
-        # do some square API client stuff
-        self.sqapi = squareconnect.ApiClient()
-        self.sqapi.configuration.access_token = self.access_key
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        amount = "$%1.2f AUD" % (self.get_object().amount / 100.0)
         context.update({
-            'app_id': self.app_id,
-            'loc_id': self.loc_id,
+            'app_id': payments.app_id,
+            'loc_id': payments.loc_id,
+            'amount': amount,
         })
         return context
 
+    def payment_success(self, payment):
+        set_paid(payment)
+
+    def get_completed_url(self):
+        return self.get_object().get_absolute_url()
+
     def post(self, request, *args, **kwargs):
         nonce = request.POST.get('nonce', None)
+        card_payment = self.get_object()
+        amount_aud = card_payment.amount / 100.0
+
         if (nonce is None or nonce == ""):
-            messages.error(request, "No nonce was generated! Please try reloading the page and submit again.")
+            messages.error(request, "Failed to collect card details. Please reload the page and submit again.")
             return self.get(request)
 
-        api_inst = TransactionsApi(self.sqapi)
-
-        body = {
-            'idempotency_key': self.idempotency_key,
-            'card_nonce': nonce,
-            'amount_money': {
-                'amount': amount,
-                'currency': 'AUD'
-            }
-        }
-
-        try:
-            api_response = api_inst.charge(self.loc_id, body)
-            messages.success(request, "Your payment of %1.2f was successful.", amount)
-        except ApiException as e:
-            messages.error(request, "Exception while calling TransactionApi::charge: %s" % e)
+        if try_capture_payment(card_payment, nonce):
+            payment_success(card_payment)
+            messages.success(request, "Your payment of $%1.2f was successful." % amount_aud)
+        else:
+            messages.error(request, "Your payment of $%1.2f was unsuccessful. Please try again later." % amount_aud)
         
-        # redirect to success URL
-        if (self.object.completed_url is None):
-            return self.get(request)
-        return HttpResponseRedirect(self.object.completed_url)
+        # redirect to success URL, or redisplay the form with a success message if none is given
+        return HttpResponseRedirect(self.get_completed_url())
 
+class MembershipPaymentView(PaymentFormView):
+    model = MembershipPayment
 
-        
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if (self.object.membership.date_paid is not None):
+            # the membership is already marked as paid, so we add an error and redirect to member home
+            messages.error(request, "Your membership is already paid. Check the cokelog (/home/other/coke/cokelog) for more details.")
+            return HttpResponseRedirect(self.get_completed_url())
+        else:
+            return super().dispatch(request, *args, **kwargs)
 
+    def payment_success(self, payment):
+        ms = payment.membership
+        ms.date_paid = timezone.now()
+        ms.payment_method = 'online'
+        ms.save()
+        super().payment_success(payment)
+
+    def get_completed_url(self):
+        return reverse('memberdb:home')
