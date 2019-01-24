@@ -8,24 +8,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django import forms
 
-from memberdb.models import Member, Membership, MEMBERSHIP_TYPES_
+from memberdb.models import Member, Membership, get_membership_type
 from memberdb.forms import MyModelForm
 from memberdb.views import MyUpdateView
-
-def get_membership_type(member):
-    best = None
-    is_fresh = member.memberships.all().count() == 0
-    for t in MEMBERSHIP_TYPES_:
-        if (t['must_be_fresh'] == is_fresh and t['is_student'] == member.is_student and t['is_guild'] == member.is_guild):
-            best = t
-            break
-        elif (t['is_student'] == member.is_student and t['is_guild'] == member.is_guild):
-            best = t
-            break
-    if (best is None):
-        return MEMBERSHIP_TYPES_[1]['dispense']
-    else:
-        return best['dispense']
 
 def make_pending_membership(member):
     # check if this member already has a pending membership
