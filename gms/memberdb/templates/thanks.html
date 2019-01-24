@@ -8,4 +8,11 @@
 <b>Your membership registration has been submitted.</b><br><br>
 Once it has been approved, you will receive an email with instructions to activate your account.
 {% endblock %}
-{% block form %}{% endblock %}
+
+{% block form %}
+{% if payment_url %}
+<div class="form-row readonly">
+    <a class="button" title="Pay online with card, using Square payments" href="{{ payment_url }}">Pay online now</a>
+</div>
+{% endif %}
+{% endblock %}
