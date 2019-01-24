@@ -22,13 +22,19 @@ def import_old_member(modeladmin, request, queryset):
             nm.display_name = om.real_name
             nm.is_guild = om.guild_member
             nm.phone_number = om.phone_number
-            nm.id_number = om.student_no
+            nm.id_number = ""
             nm.email_address = om.email_address
-            if (om.membership_type == 1 or om.membership_type == 2): # O'day special or student
+            if om.membership_type == 1: # O'day special
+                # O'day special or student
+                #membership_type = 'oday'
                 nm.is_student = True
-            else:
+            elif om.membership_type == 2: # student
+                #membership_type = 'student_and_guild' if nm.is_guild else 'student_only'
+                nm.is_student = True
+            else: # non-student
+                #membership_type = 'guild_only' if nm.is_guild else 'non_student'
                 nm.is_student = False
-        
+
             if (nm.username == '' or nm.username is None):
                 raise ValidationError("username cannot be blank")
             nm.save()

@@ -1,6 +1,7 @@
 from django.db.models import Q
 from gms import admin
 from memberdb.actions import download_as_csv
+from memberdb.admin import ReadOnlyModelAdmin
 
 from .models import OldMember
 from .actions import import_old_member
@@ -31,7 +32,7 @@ class UsernameNullListFilter(admin.SimpleListFilter):
             return queryset.filter(~fresh)
 
 
-class MemberAdmin(admin.ModelAdmin):
+class MemberAdmin(ReadOnlyModelAdmin):
     list_display = ('real_name', 'username', 'membership_type', 'guild_member')
     list_filter = ['guild_member', UsernameNullListFilter, 'membership_type']
     search_fields = ('real_name', 'username', )

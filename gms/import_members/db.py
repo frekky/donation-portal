@@ -25,6 +25,6 @@ class MemberDbRouter:
         """
         Make sure we don't do any migrations to the old database, it would only break things.
         """
-        if app_label == 'import_members':
+        if app_label == 'import_members' or db == 'memberdb_old':
             return False
         return None
