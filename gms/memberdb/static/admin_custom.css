@@ -2,11 +2,11 @@
     display: inline-block;
 }
 
-.logo {
+.logo span {
     transform: rotate(45deg);
 }
 
-.logo:hover {
+.logo span:hover {
     animation: spin 0.5s linear infinite;
 }
 

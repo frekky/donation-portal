@@ -19,6 +19,13 @@ body {
     margin: 5px 30px 5px 20px;
     height: 50px;
     width: 50px;
+    overflow: hidden; /* hide the overflow when it is rotated on the admin site */
+}
+
+.logo span {
+    height: 100%;
+    width: 100%;
+    display: block;
     background-image: url("ucc-logo-white.png");
     background-repeat: no-repeat;
     background-position: center;
