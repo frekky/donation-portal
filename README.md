@@ -1,5 +1,5 @@
-uccportal - the UCC Computer Controlled Proletarian Organisational Roster That Accesses LDAP
-============================================================================================
+uccportal - the UCC Computer Controlled Proletarian Organisational Roster That Accesses LDAP [was GMS - Gumby Management System]
+================================================================================================================================
 
 This is designed to be the ultimate membership management suite for UCC. Signups are electronic and automatic, data is able to be conveniently stored in the member database and some of it is even automatically validated.
 
@@ -15,28 +15,30 @@ Features
 Stuff to do
 -----------
 
-- Online payment of membership fees using [Square Payments](https://squareup.com/au/)
+- Online payment of membership fees using [Square Payment Form](https://docs.connect.squareup.com/payments/sqpaymentform/sqpaymentform-overview)
 - Email confirmation & payment receipts
 - Automatic member account creation in Active Directory (after membership approved)
 - Validating student numbers in ID field (also via email)
-- Add dispense account balance with Square online payments
+- Add dispense account balance online with Square paymentform
 
 Workflow Design
 ---------------
 
 - __Use case 1: new member__:
     1. New member enters details on registration form, submits
-        - Gets confirmation email to the effect of "your membership is pending"
-    2. Door member logs in and verifies that details are correct, manages payment
+        - Thankyou page: contains link to edit some submission details
+        - Membership confirmation sent to student email if is student
+        - Immediate payment is possible using the online payment form, otherwise can be done later
+    2. Door member logs in and verifies that details are correct, can do payment in-person
         - Cash: door member takes cash and enters amount paid by cash
         - Card (in person): door member enters amount to charge, processed via Square App or custom POS app (Android)
         - Card (online): door member enters amount to charge, can either enter card details directly or new member can access payment form
         - Dispense note: all payments (even before account creation) processed through dispense, money is then given to newly created accounts following step 3
     3. Door member approves pending membership
-        - Pending memberships are saved into the main members table
+        - Pending memberships are marked as approved (note: pending / approved records _are_ in the same table)
         - Account is created in AD/dispense using provided details
-        - Update dispense with payment information after account creation - transfer money from `uccportal` account to `$newuser` account (for example)
-        - User gets email with link to login & change details
+            - Update dispense with payment information after account creation - transfer money from `uccportal` account to `$newuser` account (for example)
+            - User gets email with link to login & change details
     4. New member gets notification (ie. email), clicks link to set password
 - __Use case 2: existing member__ (possibly with locked account):
     1. Existing member (with existing AD/LDAP account) logs in and enters details on renewal/registration form (or confirms existing stored details are correct)
