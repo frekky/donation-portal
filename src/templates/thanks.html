@@ -4,19 +4,18 @@
 <h1>Thanks!</h1>
 {% endblock %}
 
-{% block tips %}
-<b>Thanks for registering</b><br><br>
-Once your registration has been approved, you will receive an email with instructions to activate your account.
-{% endblock %}
-
 {% block content %}
 <h3>
-    Go to the <a href="{% url 'memberdb:home' %}">Member Home</a> page to see and edit some of your details.
+    Use <a href="{{ login_url }}">this link</a> to access <i>Member Home</i> to see and edit your details, and to pay online for your membership.
 </h3>
 <p>
-    <b>You will continue to have access to this website during this browser session.</b> Alternatively, you can use <a href="{{ login_url }}">this link</a> to access your member details from anywhere for the next 7 days.
+Once your registration has been approved, you will receive an email with instructions to activate your account. If you signed up as a student, this information will be sent to the student email address that you provided.
 </p>
 <p>
-    Once you receive your UCC login details, you will be able to login normally to access the site.
+{% if request.user.is_authenticated %} <!-- the user is currently logged in, so they may have dispense credit -->
+You can either pay online now using your existing dispense credit or using a credit/debit card by going to <a href="{{ login_url }}">Member Home</a>, or you can pay in person later.
+{% else %} <!-- the user isn't logged in, but they can still pay -->
+You can pay online now with a credit/debit card by going to <a href="{{ login_url }}">Member Home</a>.
+{% endif %}
 </p>
 {% endblock %}

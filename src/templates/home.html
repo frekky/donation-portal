@@ -6,9 +6,13 @@
 {% endblock %}
 
 {% block tips %}
-{% if not object %}
+{% if not request.member %}
+{% if request.user.is_authenticated %}
 <b>You have no member record associated with this account.</b><br>
 Please <a href="{% url 'memberdb:renew' %}">renew your membership</a> to get started.
+{% else %}
+<b>Something went wrong and your membership details could not be retrieved.</b> Please try <a href="{% url 'memberdb:login' %}">logging in</a>.
+{% endif %}
 {% else %}
 You can see and modify some of your membership and account details below.
 {% endif %}
