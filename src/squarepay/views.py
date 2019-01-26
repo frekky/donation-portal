@@ -1,32 +1,24 @@
 import uuid
-from django.views.generic.base import RedirectView
+from django.views.generic.base import RedirectView, View
 from django.views.generic.detail import DetailView
 from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 
+from memberdb.views import MemberAccessMixin
+from memberdb.models import Membership, MEMBERSHIP_TYPES
+
 from .models import MembershipPayment, CardPayment
 from . import payments
-from .payments import try_capture_payment, set_paid
+from .payments import try_capture_payment
+from .dispense import get_item_price
 
-class PaymentFormView(DetailView):
-    """
-    Handles the backend stuff for the Square payment form.
-    See https://docs.connect.squareup.com/payments/sqpaymentform/setup
-    """
-
+class PaymentFormMixin:
     template_name = 'payment_form.html'
-
-    model = CardPayment
-    slug_field = 'token'
-    slug_url_kwarg = 'token'
-    query_pk_and_slug = True
     context_object_name = 'payment'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -40,9 +32,10 @@ class PaymentFormView(DetailView):
 
     def payment_success(self, payment):
         set_paid(payment)
+        messages.success(request, "Your payment of $%1.2f was successful." % amount_aud)
 
-    def get_completed_url(self):
-        return self.get_object().get_absolute_url()
+    def payment_error(self, payment):
+        messages.error(request, "Your payment of $%1.2f was unsuccessful. Please try again later." % amount_aud)
 
     def post(self, request, *args, **kwargs):
         nonce = request.POST.get('nonce', None)
@@ -55,20 +48,66 @@ class PaymentFormView(DetailView):
 
         if try_capture_payment(card_payment, nonce):
             payment_success(card_payment)
-            messages.success(request, "Your payment of $%1.2f was successful." % amount_aud)
         else:
-            messages.error(request, "Your payment of $%1.2f was unsuccessful. Please try again later." % amount_aud)
-        
+            payment_error(card_payment)
+
         # redirect to success URL, or redisplay the form with a success message if none is given
         return HttpResponseRedirect(self.get_completed_url())
 
-class MembershipPaymentView(PaymentFormView):
-    model = MembershipPayment
+class PaymentFormView(DetailView, PaymentFormMixin):
+    """
+    Handles the backend stuff for the Square payment form.
+    See https://docs.connect.squareup.com/payments/sqpaymentform/setup
+    Note: currently unused. see MembershipPaymentView
+    """
+    model = CardPayment
+    slug_field = 'token'
+    slug_url_kwarg = 'token'
+    query_pk_and_slug = True
+
+    def get_completed_url(self):
+        return self.get_object().get_absolute_url()
+
+class MembershipPaymentView(MemberAccessMixin, PaymentFormMixin, DetailView):
+    """ displays the payment form appropriate for the given membership ID for the currently logged in member """
+
+    def get_object(self):
+        """ return the appropriate payment for the current membership, or None if no payment should be made """
+        if self.request.member is None:
+            raise Http404("no member record associated with current session")
+
+        try:
+            # find the membership record we are dealing with
+            ms = Membership.objects.get(
+                id = self.kwargs['pk'], # get the membership with the given ID
+                member = self.request.member,
+                date_paid__exact = None, # make sure membership itself is not marked as paid
+            )
+
+            # try to find a corresponding MembershipPayment record which has not been paid
+            payment = MembershipPayment.objects.get(
+                date_paid = None, # CardPayment.date_paid
+                is_paid = False, # CardPayment.is_paid
+                membership = ms, # MembershipPayment.membership
+                membership__date_paid__exact = None, # MembershipPayment.membership.date_paid
+            )
+        except Membership.DoesNotExist as e:
+            # no unpaid membership found, return
+            return None
+        except MembershipPayment.DoesNotExist as e:
+            # found an unpaid membership, but no payment record exists yet
+            messages.success(self.request, "Created payment record for as-yet unpaid membership")
+            return create_membership_payment(ms)
+        return payment
 
     def dispatch(self, request, *args, **kwargs):
+        self.request = request
         self.object = self.get_object()
-        if (self.object.membership.date_paid is not None):
-            # the membership is already marked as paid, so we add an error and redirect to member home
+
+        # don't produce the payment form if get_object() decides we don't have anything to do
+        if (self.object is None):
+            # the membership is already marked as paid and no CardPayment exists
+            # so we add an error and redirect to member home
             messages.error(request, "Your membership is already paid. Check the cokelog (/home/other/coke/cokelog) for more details.")
             return HttpResponseRedirect(self.get_completed_url())
         else:
@@ -83,3 +122,16 @@ class MembershipPaymentView(PaymentFormView):
 
     def get_completed_url(self):
         return reverse('memberdb:home')
+
+def create_membership_payment(membership, commit=True):
+    """ creates a MembershipPayment object for the given membership """
+    # get the amount from dispense
+    price = get_item_price(membership.membership_type)
+    if (price is None or price == 0):
+        return None
+    desc = MEMBERSHIP_TYPES[membership.membership_type]['desc']
+    payment = MembershipPayment(description=desc, amount=price, membership=membership)
+
+    if (commit):
+        payment.save()
+    return payment
