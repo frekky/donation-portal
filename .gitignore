@@ -12,7 +12,7 @@ misc/pg.json
 env/
 
 # static files from `gms/manage.py collectstatic`
-gms/static
+media/
 
 # Logs
 logs
