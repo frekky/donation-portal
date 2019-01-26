@@ -49,14 +49,10 @@ def try_capture_payment(card_payment, nonce):
 
     try:
         api_response = api_inst.charge(loc_id, request_body)
-        set_paid(card_payment)
+        card_payment.set_paid()
         log.info("TransactionApi response without error, charge $%1.2f" % (float(card_payment.amount) / 100.0))
         return True
     except ApiException as e:
         log.error("Exception while calling TransactionApi::charge: %s" % e)
         return False
 
-def set_paid(card_payment):
-    card_payment.is_paid = True
-    card_payment.date_paid = timezone.now()
-    card_payment.save()

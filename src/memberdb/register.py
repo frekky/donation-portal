@@ -28,7 +28,7 @@ class RegisterForm(MyModelForm):
     agree_tnc       = forms.BooleanField(label='I agree to the terms & conditions', required=True, help_text=mark_safe(
         "You agree to abide by the UCC Constitution, rulings of the UCC Committee, UCC and "
         "UWA’s Network Usage Guidelines and that you will be subscribed to the UCC Mailing List. <br>"
-        'Policies can be found <a href="https://www.ucc.asn.au/infobase/policies.ucc">here</a>.'))
+        '<b>Policies can be found <a href="https://www.ucc.asn.au/infobase/policies.ucc">here</a>.</b>'))
     membership_type = forms.ChoiceField(label='Select your membership type', required=True, choices=get_membership_choices(is_renew=False))
 
     class Meta:
@@ -36,7 +36,7 @@ class RegisterForm(MyModelForm):
         fields = ['first_name', 'last_name', 'username', 'phone_number', 'is_student', 'is_guild', 'id_number', 'email_address']
         error_messages = {
             'username': {
-                'unique': 'This username is already in use, please pick another one.',
+                'unique': 'This username is already taken, please pick another one.',
                 'invalid': 'Please pick a username with only lowercase letters and numbers'
             }
         }
@@ -97,8 +97,8 @@ class RegisterView(MyUpdateView):
         m, ms = form.save()
         messages.success(self.request, 'Your registration has been submitted.')
 
-        # set the member session info
-        self.request.session['member_id'] = m.id
+        # don't set the member session info - user can click on the link
+        #self.request.session['member_id'] = m.id
         return thanks_view(self.request, m, ms)
 
 def thanks_view(request, member, ms):
@@ -107,9 +107,9 @@ def thanks_view(request, member, ms):
         'member': member,
         'ms': ms,
         'login_url': reverse('memberdb:login_member', kwargs={'username': member.username, 'member_token': member.login_token}),
+        'payment_url': reverse('squarepay:pay_membership', kwargs={'pk': ms.id}),
     }
     return render(request, 'thanks.html', context)
-
 
 class RenewView(LoginRequiredMixin, MyUpdateView):
     template_name = 'renew.html'
@@ -139,19 +139,3 @@ class RenewView(LoginRequiredMixin, MyUpdateView):
         m, ms = form.save()
         messages.success(self.request, 'Your membership renewal has been submitted.')
         return HttpResponseRedirect(reverse("memberdb:home"))
-
-def create_member_payment(membership, commit=True):
-    """ creates a MembershipPayment object for the given membership """
-    # get the amount from dispense
-    price = get_item_price(membership.membership_type)
-    if (price is None or price == 0):
-        return None
-    desc = MEMBERSHIP_TYPES[membership.membership_type]['desc']
-    payment = MembershipPayment(description=desc, amount=price, membership=membership)
-
-    if (commit):
-        payment.save()
-    return payment
-
-def thanks_page(request, membership):
-    pass

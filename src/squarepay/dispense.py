@@ -12,7 +12,7 @@ from .payments import log
 DISPENSE_BIN = getattr(settings, 'DISPENSE_BIN', None)
 
 if DISPENSE_BIN is None:
-    log.warning("DISPENSE_BIN is not defined! Lookups for prices will fail!")
+    log.warning("DISPENSE_BIN is not defined! Lookups for prices will fallback to weird numbers (for testing)!")
 
 def run_dispense(*args):
     if DISPENSE_BIN is None:
@@ -35,9 +35,12 @@ def get_item_price(itemid):
     """ gets the price of the given dispense item in cents """
     if (itemid is None or itemid == ""):
         return None
+    if DISPENSE_BIN is None:
+        return 2223
+
     out = run_dispense('iteminfo', itemid)
-    if (out is None):
-        return 123456
+    if out is None:
+        return None
     
     s = out.split() # get something like ['pseudo:7', '25.00', 'membership', '(non-student', 'and', 'non-guild)']
     if (s[0] != itemid):

@@ -14,8 +14,18 @@ class CardPayment(models.Model):
     date_created    = models.DateTimeField('Date created', auto_now_add=True)
     date_paid       = models.DateTimeField('Date paid (payment captured)', null=True, blank=True)
 
+    def set_paid(self):
+        card_payment.is_paid = True
+        card_payment.date_paid = timezone.now()
+        card_payment.save()
+
 class MembershipPayment(CardPayment):
     """
     Link the payment to a specific membership
     """
     membership      = models.ForeignKey(Membership, on_delete=models.CASCADE, related_name='payments')
+
+    def set_paid(self):
+        self.membership.date_paid = timezone.now()
+        self.membership.payment_method = 'online'
+        super().set_paid()
