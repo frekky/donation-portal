@@ -10,7 +10,7 @@ from django.views.generic.edit import UpdateView
 from django.contrib.auth.mixins import AccessMixin
 from django.utils import timezone
 
-from .models import Member, IncAssocMember, Membership
+from .models import Member, IncAssocMember, Membership, MEMBERSHIP_TYPES, TokenConfirmation
 from .forms import MemberHomeForm
 
 class MemberMiddleware:
@@ -48,10 +48,6 @@ class MemberMiddleware:
             request.member = Member.objects.get(id=request.session['member_id'])
 
         response = self.get_response(request)
-
-        # Code to be executed for each request/response after
-        # the view is called.
-
         return response
 
 class MemberAccessMixin(AccessMixin):
@@ -66,7 +62,6 @@ Can update and create models.
 Also passes the request object to the form via its kwargs.
 """
 class MyUpdateView(UpdateView):
-    can_create = True
     object = None
 
     def get_object(self):
@@ -93,12 +88,27 @@ class MemberHomeView(MemberAccessMixin, MyUpdateView):
     def get_object(self):
         return self.request.member
 
+    def get_membership_context(self, ms):
+        """ gets the per-membership-record context data """
+        return {
+            'id': ms.id,
+            'type': MEMBERSHIP_TYPES[ms.membership_type]['desc'],
+            'submitted': ms.date_submitted.strftime('%Y-%m-%d %H:%M'),
+            'paid': ms.date_paid.strftime('%Y-%m-%d %H:%M') if ms.date_paid is not None else None,
+            'approved': ms.date_approved.strftime('%Y-%m-%d %H:%M') if ms.approved else None,
+            'is_approved': ms.approved,
+        }
+
     def get_context_data(self):
         d = super().get_context_data()
         m = self.get_object()
-        d.update({
-            'memberships': m.memberships.all() if m is not None else None,
-        })
+
+        if m is not None:
+            # get a list of all the membership records associated with this member
+            ms_list = [ self.get_membership_context(ms) for ms in m.memberships.all() ]
+            d.update({
+                'memberships': ms_list,
+            })
         return d
 
     def form_valid(self, form):
@@ -111,15 +121,36 @@ class MemberHomeView(MemberAccessMixin, MyUpdateView):
 class MemberTokenView(View):
     """ allow a user to login using a unique (secure) member token """
     def get(self, request, **kwargs):
-        if not ('member_token' in kwargs and 'username' in kwargs) or request.user.is_authenticated:
-            raise Http404()
+        if not request.user.is_authenticated:
+            # look up the member using exact match for token and username, and registered < 7 days ago
+            week_ago = timezone.now() - timedelta(days=7)
 
-        # look up the member using exact match for token and username, and registered < 7 days ago
-        week_ago = timezone.now() - timedelta(days=7)
-
-        member = Member.objects.get(login_token=kwargs['member_token'], username=kwargs['username'], created__gte=week_ago)
-        if member is None:
-            raise Http404()
+            try:
+                member = Member.objects.get(
+                    login_token=kwargs['member_token'],
+                    username=kwargs['username'],
+                    created__gte=week_ago
+                )
+            except Member.DoesNotExist:
+                raise Http404()
 
         request.session['member_id'] = member.id
         return HttpResponseRedirect(reverse('memberdb:home'))
+
+class EmailConfirmView(View):
+    """ process email confirmations """
+
+    def get(self, request, **kwargs):
+        week_ago = timezone.now() - timedelta(days=7)
+        try:
+            c = TokenConfirmation.objects.get(
+                id = kwargs['pk'],
+                confirm_token = kwargs['token'],
+                created__gte = week_ago
+            )
+            c.mark_confirmed()
+        except:
+            pass
+        messages.success(request, "Your email address has been confirmed.")
+        return HttpResponseRedirect(reverse('memberdb:home'))
+

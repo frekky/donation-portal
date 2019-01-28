@@ -1,39 +1,6 @@
-{% load static %}
-{% block member-summary %}
-<table class="ms-summary">
-    <tr class="{% cycle 'row1' 'row2' as rcl %}">
-        <th>Real name</th>
-        <td><b>{{ member.first_name }} {{ member.last_name }}</b></td>
-    </tr>
-    <tr class="{% cycle rcl %}">
-        <th>Username &amp; display name</th>
-        <td><b>{{ member.username }}</b> ({{ member.display_name }})</td>
-    </tr>
-    <tr class="{% cycle rcl %}">
-        <th>Email</th>
-        <td>
-        {% if member.email_address %}
-            <a href="mailto:{{ member.email_address }}">{{ member.email_address }}</a>
-        {% else %}
-            <i>not provided</i>
-        {% endif %}
-        </td>
-    </tr>
-    <tr class="{% cycle rcl %}">
-        <th>Phone number</th>
-        <td>{% if member.phone_number %}{{ member.phone_number }}{% else %}<i>not provided</i>{% endif %}</td>
-    </tr>
-    <tr class="{% cycle rcl %}">
-        <th>Is student</th>
-        <td>{% if member.is_student %}<img src="{% static 'admin/img/icon-yes.svg' %}" alt="yes">{% else %}<img src="{% static 'admin/img/icon-no.svg' %}" alt="no">{% endif %}</td>
-    </tr>
-    <tr class="{% cycle rcl %}">
-        <th>Is UWA Guild</th>
-        <td>{% if member.is_guild %}<img src="{% static 'admin/img/icon-yes.svg' %}" alt="yes">{% else %}<img src="{% static 'admin/img/icon-no.svg' %}" alt="no">{% endif %}</td>
-    </tr>
-    <tr class="{% cycle rcl %}">
-        <th>Student / License no.</th>
-        <td>{% if member.id_number %}{{ member.id_number }}{% else %}<i>not provided</i>{% endif %}</td>
-    </tr>
-</table>
-{% endblock %}
+{# this template is rendered and displayed as the contents of the "membership info" column in the admin pages #}
+{% extends "membership_summary.html" %}
+
+{% block header1 %}{% endblock %}
+
+

@@ -107,7 +107,6 @@ def thanks_view(request, member, ms):
         'member': member,
         'ms': ms,
         'login_url': reverse('memberdb:login_member', kwargs={'username': member.username, 'member_token': member.login_token}),
-        'payment_url': reverse('squarepay:pay_membership', kwargs={'pk': ms.id}),
     }
     return render(request, 'thanks.html', context)
 
@@ -126,6 +125,7 @@ class RenewView(LoginRequiredMixin, MyUpdateView):
             obj.first_name = u.first_name
             obj.last_name = u.last_name
             obj.email_address = u.email
+            obj.login_token = None # renewing members won't need this
         return obj
 
     def get_context_data(self, **kwargs):

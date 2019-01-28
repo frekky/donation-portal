@@ -1,6 +1,6 @@
-{% load static %}
+{% load static %}{# this template is used to generate the member action buttons, see memberdb/admin.py #}
 <div class="member-actions">
-    <a class="button" href="{{ member_url }}">Edit Member</a>&nbsp;
+    <a class="button" href="{{ member_url }}">Edit</a>&nbsp;
     {% if not ms.approved %}
     <a class="button" href="{{ member_approve }}">Approve</a>&nbsp;
     {% endif %}

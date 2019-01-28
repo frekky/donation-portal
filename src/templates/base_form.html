@@ -37,6 +37,7 @@
             {% endif %}
         </div>
         {% endfor %}
+        {% block postform %}{% endblock %}
         <div class="submit-row">
             <input type="submit" class="default" value="{% block action_text %}Register{% endblock %}">
         </div>

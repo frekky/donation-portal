@@ -130,3 +130,8 @@ nav {
 .navtab:last-child {
     border-right: 1.5px solid #555;
 }
+
+.member-details, .membership-details {
+    width: 100%;
+    text-align: left;
+}
