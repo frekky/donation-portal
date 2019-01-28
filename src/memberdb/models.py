@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import F
 from django.core.validators import RegexValidator
 from django.core.management.utils import get_random_string
+from django.urls import reverse
 
 from squarepay.dispense import get_item_price
 
@@ -103,11 +104,12 @@ PAYMENT_METHODS = [
     ('', 'No payment')
 ]
 
-"""
-Member record for data we are legally required to keep under Incorporations Act (and make available to members upon request)
-Note: these data should only be changed administratively or with suitable validation since it must be up to date & accurate.
-"""
 class IncAssocMember (models.Model):
+    """
+    Member record for data we are legally required to keep under Incorporations Act (and make available to members upon request)
+    Note: these data should only be changed administratively or with suitable validation since it must be up to date & accurate.
+    """
+
     first_name      = models.CharField ('First name', max_length=200)
     last_name       = models.CharField ('Surname', max_length=200)
     email_address   = models.EmailField ('Email address', blank=False)
@@ -121,20 +123,28 @@ class IncAssocMember (models.Model):
         verbose_name = "Incorporations Act member data"
         verbose_name_plural = verbose_name
 
-"""
-Member table: only latest information, one record per member
-Some of this data may be required by the UWA Student Guild. Other stuff is just good to know, and we don't _need_ to keep historical data for every current/past member.
-Note: Privacy laws are a thing, unless people allow it then we cannot provide this info to members.
-"""
 class Member (IncAssocMember):
+    """
+    Member table: only latest information, one record per member
+    Some of this data may be required by the UWA Student Guild. Other stuff is just good to know,
+    and we don't _need_ to keep historical data for every current/past member.
+    Note: Privacy laws are a thing, unless people allow it then we cannot provide this info to members.
+    """
+
+    # data to be entered by user and validated (mostly) manually
     display_name    = models.CharField ('Display name', max_length=200)
     username        = models.SlugField ('Username', max_length=32, null=False, blank=False, unique=True, validators=[RegexValidator(regex='^[a-z0-9._-]+$')])
     phone_number    = models.CharField ('Phone number', max_length=20, blank=False, validators=[RegexValidator(regex='^\+?[0-9() -]+$')])
     is_student      = models.BooleanField ('Student', default=True, blank=True, help_text="Tick this box if you are a current student at a secondary or tertiary institution in WA")
     is_guild        = models.BooleanField ('UWA Guild member', default=True, blank=True)
     id_number       = models.CharField ('Student email or Drivers License', max_length=255, blank=False, help_text="Student emails should end with '@student.*.edu.au' and drivers licences should be in the format '<AU state> 1234567'")
+
+    # data used internally by the system, not to be touched, seen or heard (except when it is)
     member_updated  = models.DateTimeField ('Internal UCC info last updated', auto_now=True)
     login_token     = models.CharField ('Temporary access key', max_length=128, null=True, editable=False, default=make_token)
+    email_confirm   = models.BooleanField ('Email address confirmed', null=False, editable=False, default=False)
+    studnt_confirm  = models.BooleanField ('Student status confirmed', null=False, editable=False, default=False)
+    guild_confirm   = models.BooleanField ('Guild status confirmed', null=False, editable=False, default=False)
 
     def __str__ (self):
         if (self.display_name != "%s %s" % (self.first_name, self.last_name)):
@@ -146,10 +156,11 @@ class Member (IncAssocMember):
     class Meta:
         verbose_name = "Internal UCC member record"
 
-"""
-Membership table: store information related to individual (successful/accepted) signups/renewals
-"""
 class Membership (models.Model):
+    """
+    Membership table: store information related to individual (successful/accepted) signups/renewals
+    """
+
     member          = models.ForeignKey (Member, on_delete=models.CASCADE, related_name='memberships')
     membership_type = models.CharField ('Membership type', max_length=20, blank=True, null=False, choices=get_membership_choices(get_prices=False))
     payment_method  = models.CharField ('Payment method', max_length=10, blank=True, null=True, choices=PAYMENT_METHODS, default=None)
@@ -168,3 +179,23 @@ class Membership (models.Model):
     class Meta:
         verbose_name = "Membership renewal record"
         ordering = ['approved', '-date_submitted']
+
+class TokenConfirmation(models.Model):
+    """ keep track of email confirmation tokens etc. and which field to update """
+    member          = models.ForeignKey (Member, on_delete=models.CASCADE, related_name='token_confirmations')
+    confirm_token   = models.CharField ('unique confirmation URL token', max_length=128, null=False, default=make_token)
+    model_field     = models.CharField ('name of BooleanField to update on parent when confirmed', max_length=40, null=False, blank=False)
+    created         = models.DateTimeField ('creation date', auto_now_add=True)
+
+    def mark_confirmed(self):
+        """ try to mark as confirmed, if error then silently fail """
+        try:
+            m = self.member
+            setattr(m, self.model_field)
+            m.save()
+            self.delete()
+        except Member.DoesNotExist as e:
+            pass
+
+    def get_absolute_url(self):
+        return reverse('memberdb:email_confirm', kwargs={'pk': self.id, 'token': self.confirm_token})

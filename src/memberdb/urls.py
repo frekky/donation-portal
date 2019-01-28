@@ -2,7 +2,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.views.generic.base import TemplateView
 
-from .views import MemberHomeView, MemberTokenView
+from .views import MemberHomeView, MemberTokenView, EmailConfirmView
 from .register import RegisterView, RenewView
 
 app_name = 'memberdb'
@@ -20,6 +20,9 @@ urlpatterns = [
 
     # for members to "login" before having created a user account
     path('login/<username>/<member_token>/', MemberTokenView.as_view(), name='login_member'),
+
+    # email confirmation
+    path('confirm/<int:pk>/<str:token>/', EmailConfirmView.as_view(), name='email_confirm'),
     
     path('register/', RegisterView.as_view(), name='register'),
     path('renew/', RenewView.as_view(), name='renew'),
