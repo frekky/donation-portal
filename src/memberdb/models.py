@@ -69,8 +69,12 @@ def get_membership_choices(is_renew=None, get_prices=True):
             # so this option is only displayed on the renewal form
             continue
         else:
-            price = get_item_price(val['dispense'])
-            if (get_prices and price is not None):
+            if get_prices:
+                price = get_item_price(val['dispense'])
+            else:
+                price = None
+
+            if price is not None:
                 desc = "%s ($%1.2f)" % (val['desc'], price / 100.0)
                 choices += [(key, desc)]
             else:
