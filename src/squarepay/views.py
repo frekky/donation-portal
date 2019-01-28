@@ -31,11 +31,12 @@ class PaymentFormMixin:
         return context
 
     def payment_success(self, payment):
-        set_paid(payment)
-        messages.success(request, "Your payment of $%1.2f was successful." % amount_aud)
+        payment.set_paid()
+        messages.success(self.request, "Your payment of $%1.2f was successful." % (payment.amount / 100.0))
 
     def payment_error(self, payment):
-        messages.error(request, "Your payment of $%1.2f was unsuccessful. Please try again later." % amount_aud)
+        messages.error(self.request, "Your payment of $%1.2f was unsuccessful. Please try again later." % (payment.amount / 100.0))
+        payment.delete()
 
     def post(self, request, *args, **kwargs):
         nonce = request.POST.get('nonce', None)
@@ -47,9 +48,9 @@ class PaymentFormMixin:
             return self.get(request)
 
         if try_capture_payment(card_payment, nonce):
-            payment_success(card_payment)
+            self.payment_success(card_payment)
         else:
-            payment_error(card_payment)
+            self.payment_error(card_payment)
 
         # redirect to success URL, or redisplay the form with a success message if none is given
         return HttpResponseRedirect(self.get_completed_url())

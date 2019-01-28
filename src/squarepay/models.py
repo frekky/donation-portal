@@ -2,6 +2,7 @@ import uuid
 
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 
 from memberdb.models import Membership, make_token
 
@@ -15,9 +16,9 @@ class CardPayment(models.Model):
     date_paid       = models.DateTimeField('Date paid (payment captured)', null=True, blank=True)
 
     def set_paid(self):
-        card_payment.is_paid = True
-        card_payment.date_paid = timezone.now()
-        card_payment.save()
+        self.is_paid = True
+        self.date_paid = timezone.now()
+        self.save()
 
 class MembershipPayment(CardPayment):
     """

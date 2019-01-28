@@ -5,7 +5,6 @@ import logging
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import timezone
 
 import squareconnect
 from squareconnect.rest import ApiException
