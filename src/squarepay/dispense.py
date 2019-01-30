@@ -18,8 +18,8 @@ def run_dispense(*args):
     if DISPENSE_BIN is None:
         return None
     
-    cmd = [DISPENSE_BIN] + args
-    log.info("run_dispense: " + cmd)
+    cmd = (DISPENSE_BIN, ) + args
+    log.info("run_dispense: " + str(cmd))
     try:
         # get a string containing the output of the program
         res = subprocess.check_output(cmd, timeout=4, universal_newlines=True)
@@ -48,4 +48,4 @@ def get_item_price(itemid):
         return None
     else:
         # return the price as a number of cents
-        return int(float(s[0]) * 100)
+        return int(float(s[1]) * 100)
