@@ -20,6 +20,16 @@ Stuff to do
 - Automatic member account creation in Active Directory (after membership approved)
 - Validating student numbers in ID field (also via email)
 - Add dispense account balance online with Square paymentform
+- Mailing list subscription management
+- Change first name & last name to just "Real Name"
+    - then change display name to "Preferred name"
+    - delete sn & firstName attributes in AD
+- Remove display name as editable field or make it only editable once it syncs with AD
+- Actions to rightmost column
+- Redirect to changelist
+- Add reject membership button to admin actions
+- Remove admin site banner / header & change colour scheme
+- Pending memberships badge on admin index
 
 Workflow Design
 ---------------
