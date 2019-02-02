@@ -5,8 +5,10 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 import ldap
+import memberdb.models
 from datetime import date
 from squarepay import dispense
+
 
 log = logging.getLogger('ldap')
 # load config
@@ -97,4 +99,12 @@ def unlock_account(username):
 	
 	reason = "account unlocked by uccportal on %s" % str(today)
 	dispense.set_dispense_flag(username, '!disabled', reason)
+
+
+def create_account(member):
+
+
+	return None;
+
+
 

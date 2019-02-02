@@ -15,11 +15,12 @@ if DISPENSE_BIN is None:
 	log.warning("DISPENSE_BIN is not defined! Lookups for prices will fallback to weird numbers (for testing)!")
 
 def run_dispense(*args):
+<<<<<<< HEAD
 	if DISPENSE_BIN is None:
 		return None
 	
-	cmd = (DISPENSE_BIN, ) + args
-	log.info("run_dispense: " + str(cmd))
+	cmd = [DISPENSE_BIN] + args
+	log.info("run_dispense: " + cmd)
 	try:
 		# get a string containing the output of the program
 		res = subprocess.check_output(cmd, timeout=4, universal_newlines=True)
@@ -48,7 +49,7 @@ def get_item_price(itemid):
 		return None
 	else:
 		# return the price as a number of cents
-		return int(float(s[1]) * 100)
+		return int(float(s[0]) * 100)
 
 def set_dispense_flag(user, flag, reason):
 	if DISPENSE_BIN is None:
@@ -63,3 +64,39 @@ def set_dispense_flag(user, flag, reason):
 		log.warning("set_dispense_flag: user was not updated with error: " + out)
 		return False;
 	return True;
+=======
+    if DISPENSE_BIN is None:
+        return None
+    
+    cmd = (DISPENSE_BIN, ) + args
+    log.info("run_dispense: " + str(cmd))
+    try:
+        # get a string containing the output of the program
+        res = subprocess.check_output(cmd, timeout=4, universal_newlines=True)
+    except CalledProcessError as e:
+        log.warning("dispense returned error code %d, output: '%s'" % (e.returncode, e.output))
+        return None
+    except TimeoutExpired as e:
+        log.error(e)
+        return None
+    return res
+
+def get_item_price(itemid):
+    """ gets the price of the given dispense item in cents """
+    if (itemid is None or itemid == ""):
+        return None
+    if DISPENSE_BIN is None:
+        return 2223
+
+    out = run_dispense('iteminfo', itemid)
+    if out is None:
+        return None
+    
+    s = out.split() # get something like ['pseudo:7', '25.00', 'membership', '(non-student', 'and', 'non-guild)']
+    if (s[0] != itemid):
+        log.warning("get_item_price: got result for incorrect item: %s" + s)
+        return None
+    else:
+        # return the price as a number of cents
+        return int(float(s[1]) * 100)
+>>>>>>> origin/frekk-testing
