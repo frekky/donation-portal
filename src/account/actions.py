@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 import ldap
+import re
 import memberdb.models
 from datetime import date
 from squarepay import dispense
@@ -100,10 +101,25 @@ def unlock_account(username):
 	reason = "account unlocked by uccportal on %s" % str(today)
 	dispense.set_dispense_flag(username, '!disabled', reason)
 
-
+# Account creation steps:
+# 
 def create_account(member):
+	username = 
+	log.info("I: creating new account for %s (%s %s)")
+	
+	# prepend student numbers with 'sn'
+	if re.fullmatch(r"^2\d{7}$", username):
+		log.info("I: username is a student number, adding sn prefix")
+		username = sn + username
+
+	# usernames can't begin with a numeric
+	if re.match(r"^\d", username):
+		log.error("E: The username %s cannot start with a digit." % username)
+		return;
+	
 
 
+	
 	return None;
 
 

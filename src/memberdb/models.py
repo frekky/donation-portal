@@ -110,6 +110,11 @@ PAYMENT_METHODS = [
 	('', 'No payment')
 ]
 
+ACCOUNT_STATUS = [
+		'enabled',
+		'disabled',
+		'no account'
+		]
 
 
 
@@ -157,8 +162,6 @@ class Member (IncAssocMember):
 
 	# account info
 	def get_account_status(self):
-		
-			
 		return;
 
 	def __str__ (self):
