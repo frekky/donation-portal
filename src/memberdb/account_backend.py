@@ -2,7 +2,8 @@
 import logging
 
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.utils.translation import gettext_lazy as _
 
 import ldap
 import re
@@ -15,9 +16,9 @@ log = logging.getLogger('ldap')
 # load config
 
 ldap_uri = getattr(settings, 'AUTH_LDAP_SERVER_URI')
-ldap_search_dn = getattr(settings, 'REPLACE_ME')
-ldap_bind_dn = getattr()
-ldap_bind_secret = getattr()
+ldap_search_dn = getattr(settings, 'AUTH_LDAP_USER_DN_TEMPLATE')
+#ldap_bind_dn = getattr()
+#ldap_bind_secret = getattr()
 
 
 #initalise ldap instace
@@ -40,6 +41,9 @@ def get_user_attrs(username, attrs):
 			return None
 		return result[0]; 
 
+	except:
+		return None
+
 def get_account_lock_status(username):
 	ld = get_ldap_instance()
 	try:
@@ -48,6 +52,17 @@ def get_account_lock_status(username):
 	finally:
 		ld.unbind()
 	return bool(result[1]['userAccountControl'] & 0x002)
+
+def validate_username(value):
+	# usernames can't begin with a numeric
+	if re.match(r"^\d.*", value):
+		log.info("test")
+		raise ValidationError(
+			_('Username cannot begin with a number'),
+			params={'value': value}
+		)
+	else:
+		return value
 
 # locks the specified User Account by performing the following actions:
 # 1. set UAC ACCOUNTDISABLE flag (0x002) via ldap
@@ -104,7 +119,7 @@ def unlock_account(username):
 # Account creation steps:
 # 
 def create_account(member):
-	username = 
+	username = "changeme";
 	log.info("I: creating new account for %s (%s %s)")
 	
 	# prepend student numbers with 'sn'
