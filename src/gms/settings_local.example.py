@@ -44,6 +44,11 @@ LOG_FILENAME = os.path.join(ROOT_DIR, "django.log")
 import ldap
 from django_auth_ldap.config import LDAPSearch, ActiveDirectoryGroupType, LDAPGroupQuery
 
+# LDAP admin settings
+LDAP_USER_SEARCH_DN = 'CN=Users,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au'
+LDAP_BIND_DN = ""
+LDAP_BIND_SECRET = ""
+
 # this could be ad.ucc.gu.uwa.edu.au but that doesn't resolve externally -
 # useful for testing, but should be changed in production so failover works
 AUTH_LDAP_SERVER_URI = 'ldaps://samson.ucc.gu.uwa.edu.au/'
