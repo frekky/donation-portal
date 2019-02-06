@@ -2,32 +2,31 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
+from django.contrib import messages
 from django import forms
+from formtools.wizard.views import SessionWizardView
 
 from .models import Member
-from .forms import MyModelForm
-from .views import MyUpdateView
+from .forms import MyModelForm, MyForm
+from .views import MyUpdateView, MyWizardView
 from memberdb.account_backend import validate_username
+
+
 
 class AccountForm(MyModelForm):
 
 	# form fields
-	user= forms.SlugField(
-		validators=[validate_username]
-		)
-	forward_email  = forms.EmailField(
-		label='Forwarding address(optional)', 
-		required=False,
-		help_text="Your club email will be forwarded to this address. Leave blank if email forwarding is not required"
+	username = forms.SlugField(
+		validators=[validate_username],
+		max_length=19,
 	)
-
 	password = forms.CharField(
 		min_length=10, 
 		max_length=127, 
 		widget=forms.PasswordInput, 
 		strip=False,
-		help_text="Password must be between 10 and 127 characters long") 
-
+		help_text="Password must be between 10 and 127 characters long"
+	) 
 	confirm_password = forms.CharField(
 		min_length=10, 
 		max_length=127, 
@@ -35,41 +34,79 @@ class AccountForm(MyModelForm):
 		strip=False,
 	)
 
-
 	class Meta:
 		model = Member
-		fields = ['first_name']
-		error_messages = {
-			'username': {
-				'unique': 'This username is already taken, please pick another one.',
-				'invalid': 'Please pick a username with only lowercase letters and numbers'
-			}
-		}
+		fields = ['username']
+
 	def clean(self):
 		try:
-			user.clean()
 			if (self['password'].value() != self['confirm_password'].value()):
 				self.add_error('confirm_password', 'Passwords must match.')
-			if (self['forward_email'].value().split('@')[1] in ["ucc.asn.au", "ucc.gu.uwa.edu.au"]):
-				self.add_error('forward_email', 'Forwarding address cannot be the same as your account address.')
 		except:
 			pass
 		super().clean();
 
 	def save(self):
 		return
-		
 	
+class EmailForm(MyModelForm):
+	forward = forms.BooleanField(required=False)
+	email_address  = forms.EmailField(
+		label='Forwarding address (optional)', 
+		required=False,
+		help_text="Your club email will be forwarded to this address. Leave blank if email forwarding is not required"
+	)
 
-class AccountView(MyUpdateView):
+	class Meta:
+		model = Member
+		fields = ['forward', 'email_address']
+	
+	def clean(self):
+		if self['forward'].value() == True:
+			try:
+				if (self['email_address'].value().split('@')[1] in ["ucc.asn.au", "ucc.gu.uwa.edu.au"]):
+					self.add_error('email_address', 'Forwarding address cannot be the same as your account address.')
+			except:
+				pass
+		super().clean();
+
+class DispenseForm(MyForm):
+	pin = forms.CharField(
+		min_length=0, 
+		max_length=4, 
+		widget=forms.PasswordInput, 
+		strip=False,
+		help_text="PIN must be 4 digits long") 
+
+	confirm_pin = forms.CharField(
+		min_length=0, 
+		max_length=4, 
+		widget=forms.PasswordInput,
+		strip=False,
+	)
+	def clean(self):
+		try:
+			if len(self['pin'].value()) != 4 :
+				self.add_error('pin', 'PIN must be excatly 4 digits.')
+			if not self['pin'].value().isdigit():
+				self.add_error('pin', 'PIN can only contain numbers.')
+			if (self['pin'].value() != self['confirm_pin'].value()):
+				self.add_error('confirm_pin', 'PINs must match.')
+		except:
+			pass
+		super().clean();
+		
+
+class AccountView(MyWizardView):
+	form_list = [AccountForm,EmailForm,DispenseForm]
 	template_name = 'admin/memberdb/account_create.html'
-	form_class = AccountForm
-	model = Member
-	pk_url_kwarg = 'object_id'
 	admin = None
 
+	def get_form_instance(self, step):
+		return self.object
+
 	def get_context_data(self, **kwargs):
-		m = self.get_object()
+		m = self.object 
 		context = super().get_context_data(**kwargs)
 		context.update(self.admin.admin_site.each_context(self.request))
 		context.update({
@@ -78,7 +115,19 @@ class AccountView(MyUpdateView):
 		})
 		return context
 
-	def form_valid(self, form):
-		m, ms = form.save()
+
+	def done(self, form_list, form_dict, **kwargs):
 		messages.success(self.request, 'Your membership renewal has been submitted.')
-		return HttpResponseRedirect(reverse("admin:memberdb_membership_summary"))
+		return HttpResponseRedirect(reverse("admin:memberdb_membership_changelist"))
+
+		#return accountProgressView(self.request, m)
+
+
+def accountProgressView(request, member):
+	return
+
+	
+	
+
+def accountFinalView():
+	return render(request, 'accountfinal.html', context) 

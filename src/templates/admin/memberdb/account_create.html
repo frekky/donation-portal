@@ -1,39 +1,62 @@
 ﻿{% extends "admin/change_form.html" %}
-{% load i18n admin_static admin_modify %}
+{% load i18n admin_static admin_modify admin_urls %}
+
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+{# This makes use of some hacky javascript to replace the default "actions" dropdown list with more user-friendly buttons for each action. #}
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+{% endblock %}
+
 
 {% block content %}
 <div id="content-main">
 <h1>Create Account for <i>{{ member.first_name }} {{ member.last_name }}</i></h1>
-<div class="ms-approve-summary">
-{% include "admin/memberdb/membership_summary.html" %}
-</div>
+  <div class="ms-approve-summary">
+	{% include "admin/memberdb/membership_summary.html" %}
+  </div>
 <form action="" method="POST">
-    {% csrf_token %}
+	{{ wizard.management_form }}
+	{% csrf_token %}
 
-    {% if form.non_field_errors|length > 0 %}
-      <p class="errornote">
-          Please correct the errors below.
-      </p>
-      {{ form.non_field_errors }}
-    {% endif %}
+	{% if form.non_field_errors|length > 0 %}
+	  <p class="errornote">
+		  Please correct the errors below.
+	  </p>
+	  {{ form.non_field_errors }}
+	{% endif %}
 
-    <fieldset class="module aligned">
-      {% for field in form %}
-        <div class="form-row">
-          {{ field.label_tag }}
-          {{ field }}
-          {{ field.errors }}
-          {% if field.field.help_text %}
-          <p class="help">
-            {{ field.field.help_text|safe }}
-          </p>
-          {% endif %}
-        </div>
-      {% endfor %}
-    </fieldset>
-    <div class="submit-row">
-        <input type="submit" class="default" value="Create">
-    </div>
+	{{ wizard.form.management_form }}
+	<fieldset class="module aligned">
+	  {% for field in wizard.form %}
+		<div class="form-row" id="{{ field.html_name}}">
+		  {{ field.label_tag }}
+		  {{ field }}
+		  {{ field.errors }}
+		  {% if field.field.help_text %}
+		  <p class="help">
+			{{ field.field.help_text|safe }}
+		  </p>
+		  {% endif %}
+		</div>
+	  {% endfor %}
+	</fieldset>
+	<div class="submit-row">
+	  {% if wizard.steps.prev %}
+		<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}"> prev </button>
+	 {% endif %}
+	  
+	{% if wizard.steps.next %}
+		<input type="submit" value="{% trans "next" %}"/>
+	{% else %}
+		<input type="submit" value="{% trans "finish" %}"/>
+	{%endif%}
+	</div>
+
+	{% if wizard.steps.index == 1 %}
+	  <script type="text/javascript" src="{% static 'account_form.js' %}"></script>
+	{% endif %}
 </form>
 </div>
 

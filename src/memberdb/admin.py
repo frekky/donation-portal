@@ -73,8 +73,14 @@ class MemberAdmin(admin.ModelAdmin):
 		extra_context['incassocmember_url'] = get_model_url(object_id, 'incassocmember')
 		return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
+
 	def process_account(self, request, *args, **kwargs):
-		return AccountView.as_view(admin=self)(request, *args, **kwargs)
+		inst = Member.objects.get(pk=kwargs['object_id'])
+		model_dict = {
+			'0': inst,
+			'1': inst
+		}
+		return AccountView.as_view(object=inst,admin=self)(request, *args, **kwargs)
 
 
 
