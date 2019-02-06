@@ -64,6 +64,8 @@ class EmailForm(MyModelForm):
 	def clean(self):
 		if self['forward'].value() == True:
 			try:
+				if (len(self['email_address'].value()) == 0):
+					self.add_error('email_address', 'Email field cannot be left blankL.')
 				if (self['email_address'].value().split('@')[1] in ["ucc.asn.au", "ucc.gu.uwa.edu.au"]):
 					self.add_error('email_address', 'Forwarding address cannot be the same as your account address.')
 			except:
@@ -76,12 +78,14 @@ class DispenseForm(MyForm):
 		max_length=4, 
 		widget=forms.PasswordInput, 
 		strip=False,
+		required=False,
 		help_text="PIN must be 4 digits long") 
 
 	confirm_pin = forms.CharField(
 		min_length=0, 
 		max_length=4, 
 		widget=forms.PasswordInput,
+		required=False,
 		strip=False,
 	)
 	def clean(self):
