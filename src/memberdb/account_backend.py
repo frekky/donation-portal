@@ -19,6 +19,9 @@ import memberdb.models
 from datetime import date
 from squarepay import dispense
 
+import shutil
+import os
+
 
 log = logging.getLogger('ldap')
 
@@ -28,6 +31,10 @@ ldap_user_dn = getattr(settings, 'LDAP_USER_SEARCH_DN')
 ldap_base_dn = getattr(settings, 'LDAP_BASE_DN')
 ldap_bind_dn = getattr(settings, 'LDAP_BIND_DN')
 ldap_bind_secret = getattr(settings, 'LDAP_BIND_SECRET')
+make_home_cmd = "sudo python3 root_actions.py" 
+make_mail_cmd = 'ssh -i %s root@mooneye "/usr/local/mailman/bin/add_members" -r- ucc-announce <<< %s@ucc.asn.au'
+make_mail_key = './mooneye.key'
+
 
 maxuid_dn = "CN=uccdomayne,CN=ypservers,CN=ypServ30,CN=RpcServices,CN=System,"+ldap_base_dn
 
@@ -179,8 +186,7 @@ def unlock_account(username):
 	reason = "account unlocked by uccportal on %s" % str(today)
 	dispense.set_dispense_flag(username, '!disabled', reason)
 
-# Account creation steps:
-#
+# Account creation
 def create_ad_user(form_data, member):
 	log.info("I: creating new account for %s (%s)")
 
@@ -265,12 +271,15 @@ def create_ad_user(form_data, member):
 	ld.unbind();
 	return True;
 
-def create_homes(member):
-	return
-def set_email_forwarding(member, addr):
-	return
+def make_home(member,formdata):
+	user = member.username
+	mail = formdata['email_address'] if formdata['forward'] else ""
+	return subprocess.call(make_home_cmd, user, mail)
+
+
 def subscribe_to_list(member):
-	return
+	return os.system(make_mail_cmd % (make_mail_key, member.username))
+
 def set_pin(member, pin):
 	return
 
