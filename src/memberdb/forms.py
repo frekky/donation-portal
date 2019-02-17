@@ -23,4 +23,4 @@ class MyForm(forms.Form):
 class MemberHomeForm(MyModelForm):
     class Meta:
         model = Member
-        fields = ['display_name', 'email_address', 'phone_number']
+        fields = [ 'email_address', 'phone_number']

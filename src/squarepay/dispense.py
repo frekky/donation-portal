@@ -55,11 +55,30 @@ def set_dispense_flag(user, flag, reason):
 		log.warning("DISPENSE_BIN is not defined, user will not be disabled")
 		return False
 
-	cmd = [DISPENSE_BIN] + args
 	out = run_dispense('user', 'type', user, flag, reason)
 	s = out.split()
 	if s[2] != "updated":
 		# user was not updated
 		log.warning("set_dispense_flag: user was not updated with error: " + out)
 		return False;
+	return True;
+
+def make_dispense_account(user, pin):
+	if DISPENSE_BIN is None:
+		log.warning("DISPENSE_BIN is not defined")
+		return False
+
+	cmdargs = [
+		("user","add", user),
+		("acct",user,"+500","treasurer: new user"),
+		("-u", user, "pinset", pin)
+	]
+
+
+	for args in cmdargs:
+		cmd = [DISPENSE_BIN] + args
+		out = run_dispense('user', 'type', user, flag, reason)
+		if out == None:
+			raise CalledProcessError
+
 	return True;

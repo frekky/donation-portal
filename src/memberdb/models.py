@@ -5,6 +5,7 @@ from django.core.management.utils import get_random_string
 from django.urls import reverse
 
 from squarepay.dispense import get_item_price
+import subprocess
 
 import ldap
 
@@ -110,6 +111,13 @@ PAYMENT_METHODS = [
 	('', 'No payment')
 ]
 
+ID_TYPES = [
+	('student', 'Student ID'),
+	('drivers', 'Drivers licence'),
+	('passport', 'Passport'),
+	('Other', 'Other ID'),
+]
+
 ACCOUNT_STATUS = [
 		'enabled',
 		'disabled',
@@ -124,15 +132,15 @@ class IncAssocMember (models.Model):
 	Note: these data should only be changed administratively or with suitable validation since it must be up to date & accurate.
 	"""
 
-	first_name      = models.CharField ('First name', max_length=200)
-	last_name       = models.CharField ('Surname', max_length=200)
-	email_address   = models.EmailField ('Email address', blank=False)
+	first_name      = models.CharField ('Given Name', max_length=200)
+	last_name       = models.CharField ('Other Names', max_length=200)
+	email_address   = models.EmailField ('Contact email', blank=False)
 	updated         = models.DateTimeField ('IncA. info last updated', auto_now=True)
 	created         = models.DateTimeField ('When created', auto_now_add=True)
 
 	def __str__ (self):
 		return "%s %s <%s>" % (self.first_name, self.last_name, self.email_address)
-	
+
 	class Meta:
 		verbose_name = "Incorporations Act member data"
 		verbose_name_plural = verbose_name
@@ -145,13 +153,16 @@ class Member (IncAssocMember):
 	Note: Privacy laws are a thing, unless people allow it then we cannot provide this info to members.
 	"""
 
+
+
 	# data to be entered by user and validated (mostly) manually
 	display_name    = models.CharField ('Display name', max_length=200)
-	username        = models.SlugField ('Username', max_length=32, null=False, blank=False, unique=True, validators=[RegexValidator(regex='^[a-z0-9._-]+$')])
+	username        = models.SlugField ('Username', max_length=32, null=True, blank=True, unique=True, validators=[RegexValidator(regex='^[a-z0-9._-]*$')])
 	phone_number    = models.CharField ('Phone number', max_length=20, blank=False, validators=[RegexValidator(regex='^\+?[0-9() -]+$')])
 	is_student      = models.BooleanField ('Student', default=True, blank=True, help_text="Tick this box if you are a current student at a secondary or tertiary institution in WA")
 	is_guild        = models.BooleanField ('UWA Guild member', default=True, blank=True)
-	id_number       = models.CharField ('Student email or Drivers License', max_length=255, blank=False, help_text="Student emails should end with '@student.*.edu.au' and drivers licences should be in the format '<AU state> 1234567'")
+	id_number       = models.CharField ('Student number or other ID', max_length=255, blank=False, help_text="")
+	id_desc			= models.CharField  ('Form of ID provided', max_length=255, blank=False, help_text="Please describe the type of identification provided", choices=ID_TYPES, default="student")
 
 	# data used internally by the system, not to be touched, seen or heard (except when it is)
 	member_updated  = models.DateTimeField ('Internal UCC info last updated', auto_now=True)
@@ -160,9 +171,15 @@ class Member (IncAssocMember):
 	studnt_confirm  = models.BooleanField ('Student status confirmed', null=False, editable=False, default=False)
 	guild_confirm   = models.BooleanField ('Guild status confirmed', null=False, editable=False, default=False)
 
+	has_account		= models.BooleanField ('Has AD account', null=False, editable=False, default=False)
+
 	# account info
-	def get_account_status(self):
-		return;
+	def get_uid(self):
+		result, uid = subprocess.getstatusoutput(["id", "-u", self.username])
+		if (result == 0):
+			return uid;
+		else:
+			return None;
 
 	def __str__ (self):
 		if (self.display_name != "%s %s" % (self.first_name, self.last_name)):

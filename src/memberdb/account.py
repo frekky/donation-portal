@@ -45,8 +45,7 @@ class AccountForm(MyModelForm):
 			pass
 		super().clean();
 
-	def save(self):
-		return
+
 
 class EmailForm(MyModelForm):
 	forward = forms.BooleanField(required=False)
@@ -64,7 +63,7 @@ class EmailForm(MyModelForm):
 		if self['forward'].value() == True:
 			try:
 				if (len(self['email_address'].value()) == 0):
-					self.add_error('email_address', 'Email field cannot be left blankL.')
+					self.add_error('email_address', 'Email field cannot be left blank.')
 				if (self['email_address'].value().split('@')[1] in ["ucc.asn.au", "ucc.gu.uwa.edu.au"]):
 					self.add_error('email_address', 'Forwarding address cannot be the same as your account address.')
 			except:
@@ -121,12 +120,22 @@ class AccountView(MyWizardView):
 
 	def done(self, form_list, form_dict, **kwargs):
 
+
 		# create the user and save their username if successfull
-		if create_ad_user(self.get_cleaned_data_for_step('0'), self.object):
-			form_list[0].save()
+		try:
+			if create_ad_user(self.get_cleaned_data_for_step('0'), self.object):
+				form_dict['0'].save()
 
+			make_home(self.get_cleaned_data_for_step('1'), self.object)
+			make_dispense_account(self.object.username, self.get_cleaned_data_for_step('2')['pin'])
+			subscribe_to_list(self.object)
+		except Exception as e:
+			messages.error(self.request,'Account creation failed for %s', self.object)
+			messages.error(self.request, e)
+			raise #DEBUG
 
-		messages.success(self.request, 'Your membership renewal has been submitted.')
+		else:
+			messages.success(self.request, 'An account has been successfully created for %s.' % self.object)
 		return HttpResponseRedirect(reverse("admin:memberdb_membership_changelist"))
 
 		#return accountProgressView(self.request, m)

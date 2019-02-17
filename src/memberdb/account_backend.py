@@ -31,7 +31,7 @@ ldap_user_dn = getattr(settings, 'LDAP_USER_SEARCH_DN')
 ldap_base_dn = getattr(settings, 'LDAP_BASE_DN')
 ldap_bind_dn = getattr(settings, 'LDAP_BIND_DN')
 ldap_bind_secret = getattr(settings, 'LDAP_BIND_SECRET')
-make_home_cmd = "sudo python3 root_actions.py" 
+make_home_cmd = ["sudo", "python3", "root_actions.py"] 
 make_mail_cmd = 'ssh -i %s root@mooneye "/usr/local/mailman/bin/add_members" -r- ucc-announce <<< %s@ucc.asn.au'
 make_mail_key = './mooneye.key'
 
@@ -206,7 +206,8 @@ def create_ad_user(form_data, member):
 		result = get_maxuid()
 	except:
 		log.error("LDAP: cannot find base uid")
-		return False
+		raise
+
 
 	maxuid = int(result.msSFU30MaxUidNumber.value)
 
@@ -236,7 +237,7 @@ def create_ad_user(form_data, member):
 	# sanity check: make sure the uid is free
 	if subprocess.call(["id", newuid], stderr=subprocess.DEVNULL) == 0:
 		log.error("LDAP: uid already taken")
-		return False
+		raise ValueError
 
 	# create the new user struct
 	objclass = ['top','posixAccount','person','organizationalPerson','user']
@@ -261,24 +262,31 @@ def create_ad_user(form_data, member):
 	result = ld.add(dn, objclass, attrs)
 	if not result:
 		log.error("LDAP: user add failed")
-		return False
+		raise LDAPOperationsErrorResult
 
 	# set maxuid
 	result = ld.modify(maxuid_dn, {'msSFU30MaxUidNumber': [(MODIFY_REPLACE, newuid)]})
 	if not result:
-		log.warning("LDAP: user created but msSFU30MaxUidNumber not update")
+		log.warning("LDAP: user created but msSFU30MaxUidNumber not updated")
 
 	ld.unbind();
 	return True;
 
-def make_home(member,formdata):
+def make_home(formdata, member):
 	user = member.username
 	mail = formdata['email_address'] if formdata['forward'] else ""
-	return subprocess.call(make_home_cmd, user, mail)
-
+	result = subprocess.call(make_home_cmd + [user, mail])
+	if result == 0:
+		return True
+	else:
+		raise CalledProcessError
 
 def subscribe_to_list(member):
-	return os.system(make_mail_cmd % (make_mail_key, member.username))
+	result = os.system(make_mail_cmd % (make_mail_key, member.username))
+	if result == 0:
+		return True
+	else:
+		raise CalledProcessError
 
 def set_pin(member, pin):
 	return
