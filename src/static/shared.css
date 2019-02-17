@@ -115,7 +115,7 @@ ul.messagelist li.error {
 
 /* FORM BUTTONS */
 
-.button, input[type=submit], input[type=button], .submit-row input, a.button {
+.button, input[type=submit], input[type=button], .submit-row input,.submit-row button, a.button {
     background: #79aec8;
     padding: 10px 15px;
     border: none;

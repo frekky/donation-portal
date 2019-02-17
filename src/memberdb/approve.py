@@ -117,8 +117,8 @@ class MembershipApprovalAdminView(MyUpdateView):
         
         self.admin.message_user(self.request, 'Approve success')
         url = reverse(
-            'admin:memberdb_membership_change',
-            args=[ms.pk],
+            'admin:memberdb_membership_changelist',
+            args=[],
             current_app=self.admin.admin_site.name,
         )
         return HttpResponseRedirect(url)

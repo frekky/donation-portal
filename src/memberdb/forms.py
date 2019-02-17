@@ -12,8 +12,15 @@ class MyModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
         super().__init__(*args, **kwargs)
+class MyForm(forms.Form):
+    # this must be passed by kwargs upon instantiating the form
+    request = None
+    
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        super().__init__(*args, **kwargs)
 
 class MemberHomeForm(MyModelForm):
     class Meta:
         model = Member
-        fields = ['display_name', 'email_address', 'phone_number']
+        fields = [ 'email_address', 'phone_number']
