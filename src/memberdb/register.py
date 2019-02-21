@@ -45,7 +45,7 @@ class RegisterRenewForm(MyModelForm):
 		try:
 			if (self['email_address'].value() != self['confirm_email'].value()):
 				self.add_error('email_address', 'Email addresses must match.')
-			if (self['email_address'].value().split('@')[1] in ["ucc.asn.au", "ucc.gu.uwa.edu.au"]):
+			if (self['email_address'].value().lower().split('@')[1] in ["ucc.asn.au", "ucc.gu.uwa.edu.au"]):
 					self.add_error('email_address', 'Contact address cannot be an UCC address.')
 		except:
 			pass
@@ -134,7 +134,7 @@ def thanks_view(request, member, ms):
 	context = {
 		'member': member,
 		'ms': ms,
-		'login_url': reverse('memberdb:login_member', kwargs={'username': member.username, 'member_token': member.login_token}),
+		'login_url': reverse('memberdb:login_member', kwargs={'id' : member.id, 'member_token': member.login_token}),
 	}
 	return render(request, 'thanks.html', context)
 
