@@ -148,7 +148,7 @@ class MemberTokenView(View):
             try:
                 member = Member.objects.get(
                     login_token=kwargs['member_token'],
-                    username=kwargs['username'],
+                    id=kwargs['id'],
                     created__gte=week_ago
                 )
             except Member.DoesNotExist:

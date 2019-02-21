@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 from gms.settings_local import *
 
 # DEBUG ALLOW
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', "130.95.13.36"]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', "130.95.13.36","portal.ucc.asn.au"]
 
 # Application definition
 

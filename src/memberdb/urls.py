@@ -19,7 +19,7 @@ urlpatterns = [
     path('admin/logout/', auth_views.LogoutView.as_view(template_name='logout.html')),
 
     # for members to "login" before having created a user account
-    path('login/<username>/<member_token>/', MemberTokenView.as_view(), name='login_member'),
+    path('login/<id>/<member_token>/', MemberTokenView.as_view(), name='login_member'),
 
     # email confirmation
     path('confirm/<int:pk>/<str:token>/', EmailConfirmView.as_view(), name='email_confirm'),

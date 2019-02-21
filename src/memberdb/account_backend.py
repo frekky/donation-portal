@@ -31,7 +31,7 @@ ldap_user_dn = getattr(settings, 'LDAP_USER_SEARCH_DN')
 ldap_base_dn = getattr(settings, 'LDAP_BASE_DN')
 ldap_bind_dn = getattr(settings, 'LDAP_BIND_DN')
 ldap_bind_secret = getattr(settings, 'LDAP_BIND_SECRET')
-make_home_cmd = ["sudo", "python3", "root_actions.py"] 
+make_home_cmd = ["sudo", "/services/uccportal/src/memberdb/root_actions.py"] 
 make_mail_cmd = 'ssh -i %s root@mooneye "/usr/local/mailman/bin/add_members" -r- ucc-announce <<< %s@ucc.asn.au'
 make_mail_key = './mooneye.key'
 

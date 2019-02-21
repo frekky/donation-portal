@@ -36,7 +36,6 @@ class RegisterRenewForm(MyModelForm):
 		fields = ['first_name', 'last_name', 'phone_number', 'is_student', 'is_guild', 'id_number', 'id_desc', 'email_address']
 		error_messages = {
 			'username': {
-				'unique': 'This username is already taken, please pick another one.',
 				'invalid': 'Please pick a username with only lowercase letters and numbers'
 			}
 		}

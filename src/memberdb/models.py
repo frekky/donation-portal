@@ -157,7 +157,7 @@ class Member (IncAssocMember):
 
 	# data to be entered by user and validated (mostly) manually
 	display_name    = models.CharField ('Display name', max_length=200)
-	username        = models.SlugField ('Username', max_length=32, null=True, blank=True, unique=True, validators=[RegexValidator(regex='^[a-z0-9._-]*$')])
+	username        = models.SlugField ('Username', max_length=32, null=True, blank=True, unique=False, validators=[RegexValidator(regex='^[a-z0-9._-]*$')])
 	phone_number    = models.CharField ('Phone number', max_length=20, blank=False, validators=[RegexValidator(regex='^\+?[0-9() -]+$')])
 	is_student      = models.BooleanField ('Student', default=True, blank=True, help_text="Tick this box if you are a current student at a secondary or tertiary institution in WA")
 	is_guild        = models.BooleanField ('UWA Guild member', default=True, blank=True)
