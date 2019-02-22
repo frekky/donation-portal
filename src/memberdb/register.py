@@ -126,7 +126,10 @@ class RegisterView(MyUpdateView):
 
 		# don't set the member session info - user can click on the link
 		#self.request.session['member_id'] = m.id
-		return thanks_view(self.request, m, ms)
+		if self.request.user.is_staff:
+			return HttpResponseRedirect(reverse("admin:membership-approve",args=[ms.pk]))
+		else:
+			return thanks_view(self.request, m, ms)
 
 def thanks_view(request, member, ms):
 	""" display a thankyou page after registration is completed """
@@ -165,4 +168,7 @@ class RenewView(LoginRequiredMixin, MyUpdateView):
 	def form_valid(self, form):
 		m, ms = form.save()
 		messages.success(self.request, 'Your membership renewal has been submitted.')
-		return HttpResponseRedirect(reverse("memberdb:home"))
+		if self.request.user.is_staff:
+			return HttpResponseRedirect(reverse("admin:membership-approve",args=[ms.pk]))
+		else:
+			return HttpResponseRedirect(reverse("memberdb:home"))
