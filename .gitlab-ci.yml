@@ -44,6 +44,12 @@ deploy_test:
 	stage: deploy
 	script:
 		- echo "Deploy to test"
+		- virtualenv venv
+		- . venv/bin/activate
+		- pip install -r pip-packages.txt
+		- ln -s /etc/uwsgi/vassals/test.skel /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini
+
+
 	environment:
 		name: test-$CI_COMMIT_REF_NAME
 		url: https://portal.ucc.asn.au/test/$CI_COMMIT_REF_NAME
