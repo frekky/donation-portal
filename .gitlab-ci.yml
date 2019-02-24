@@ -20,7 +20,6 @@ deploy_test:
     - test
   script:
     - echo "Deploy to test"
-    - . venv/bin/activate
     - python src/manage.py makemigrations
     - python src/manage.py migrate --run-syncdb
     - ln -s /etc/uwsgi/vassals/test.skel /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini
