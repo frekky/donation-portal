@@ -18,6 +18,8 @@ deploy_test:
   stage: deploy
   tags:
     - test
+  variables:
+    CI_DEBUG_TRACE: "true"
   script:
     - echo "Deploy to test"
     - rm -f /var/www/test/$CI_COMMIT_REF_NAME
