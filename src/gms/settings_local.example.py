@@ -14,26 +14,26 @@ ADMINS = (
 ### Database connection options ###
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',     # Add 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': '${DB_ENGINE}',     # Add 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         # this should end up in uccportal/.db/members.db
-        'NAME': os.path.join(ROOT_DIR, '.db', 'members.db'),   # Or path to database file if using sqlite3.
-        'USER': '',                                 # Not used with sqlite3.
-        'PASSWORD': '',                             # Not used with sqlite3.
-        'HOST': '',                                 # Set to empty string for localhost. Not used with sqlite3.
+        'NAME': '${DB_NAME}',   # Or path to database file if using sqlite3.
+        'USER': '${DB_USER}',                                 # Not used with sqlite3.
+        'PASSWORD': '${DB_SECRET}',                             # Not used with sqlite3.
+        'HOST': '${DB_HOST}',                                 # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                                 # Set to empty string for default. Not used with sqlite3.
     },
     'memberdb_old': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'uccmemberdb_2018',
         'USER': 'uccmemberdb',
-        'PASSWORD': 'something-secret-here',
+        'PASSWORD': '${OLDDB_SECRET}',
         'HOST': 'mussel.ucc.gu.uwa.edu.au',
         'PORT': '',
     }
 }
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'something-unique-here'
+SECRET_KEY = '${SECRET_KEY}'
 
 # Set this to whatever your ServerName/ServerAlias(es) are
 ALLOWED_HOSTS = []
@@ -45,13 +45,14 @@ import ldap
 from django_auth_ldap.config import LDAPSearch, ActiveDirectoryGroupType, LDAPGroupQuery
 
 # LDAP admin settings
+LDAP_BASE_DN = 'DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au'
 LDAP_USER_SEARCH_DN = 'CN=Users,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au'
-LDAP_BIND_DN = ""
+LDAP_BIND_DN = 'CN=uccportal,CN=Users,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au'
 LDAP_BIND_SECRET = ""
 
 # this could be ad.ucc.gu.uwa.edu.au but that doesn't resolve externally -
 # useful for testing, but should be changed in production so failover works
-AUTH_LDAP_SERVER_URI = 'ldaps://samson.ucc.gu.uwa.edu.au/'
+AUTH_LDAP_SERVER_URI = 'ldaps://ad.ucc.gu.uwa.edu.au/'
 
 # This is also a bad idea, should be changed in production
 AUTH_LDAP_GLOBAL_OPTIONS = {
@@ -92,9 +93,9 @@ AUTH_LDAP_USER_FLAGS_BY_GROUP = {
 }
 
 # the Square app and location data (set to sandbox unless you want it to charge people)
-SQUARE_APP_ID = 'maybe-sandbox-something-something-here'
-SQUARE_LOCATION = 'CBASEDE-this-is-probably-somewhere-in-Sydney'
-SQUARE_ACCESS_TOKEN = 'keep-this-very-secret'
+SQUARE_APP_ID = '${SQUARE_APP_ID}'
+SQUARE_LOCATION = '${SQUARE_LOCATION}'
+SQUARE_ACCESS_TOKEN = '${SQUARE_SECRET}'
 
 DISPENSE_BIN = '/usr/local/bin/dispense'
 
@@ -103,4 +104,4 @@ EMAIL_HOST = "secure.ucc.asn.au"
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
 EMAIL_HOST_USER = "uccportal"
-EMAIL_HOST_PASSWORD = "changeme"
+EMAIL_HOST_PASSWORD = "${EMAIL_SECRET}"
