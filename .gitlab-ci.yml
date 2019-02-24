@@ -2,6 +2,9 @@ stages:
   - test
   - deploy
 
+variables:
+  DB_ENGINE : django.db.backends.sqlite3
+
 before_script:
   - echo "preparing environment"
   - virtualenv env -p `which python3`
@@ -9,17 +12,17 @@ before_script:
   - pip install -r pip-packages.txt
   
   
-test:
+run_tests:
   stage: test
   script:
     - echo "Running tests"
+    - python src/manage.py test
 
-deploy_test:
+deploy_testing:
   stage: deploy
   tags:
     - test
   variables:
-    DB_ENGINE : django.db.backends.sqlite3
     DB_NAME : /var/www/test/$CI_COMMIT_REF_NAME/.db/members.db
     DEPLOY_HOST : $CI_COMMIT_REF_NAME.test.ucc.asn.au
   script:
@@ -38,3 +41,38 @@ deploy_test:
     url: https://$CI_COMMIT_REF_NAME.test.ucc.asn.au
   except:
       - master
+
+deploy_staging:
+  stage: deploy
+  tags:
+    - stage
+  variables:
+    DB_NAME : /var/www/stage/.db/members.db
+    DEPLOY_HOST : staging.test.ucc.asn.au
+  script:
+    - echo "Deploy to staging"
+    - rm -f /var/www/stage/$CI_PROJECT_NAME
+    - rm -f /etc/uwsgi/vassals/stage.ini
+    - ln -srT ./ /var/www/stage/$CI_PROJECT_NAME
+    - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
+    - python src/manage.py collectstatic
+    - python src/manage.py makemigrations
+    - python src/manage.py migrate --run-syncdb
+    - ln -s /etc/uwsgi/vassals/stage.skel /etc/uwsgi/vassals/stage.ini
+  environment:
+    name: stage
+    url: https://stage.test.ucc.asn.au
+  only:
+      - master
+
+stop_test:
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  when: manual
+  environment:
+    name: test/$CI_COMMIT_REF_NAME
+    action: stop
+  script:
+    - rm -f /var/www/test/$CI_COMMIT_REF_NAME
+    - rm -f /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini
