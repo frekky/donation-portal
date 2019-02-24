@@ -16,6 +16,8 @@ test:
 
 deploy_test:
   stage: deploy
+  tags:
+    - test
   script:
     - echo "Deploy to test"
     - . venv/bin/activate
