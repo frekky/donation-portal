@@ -40,6 +40,7 @@ deploy_testing:
   environment:
     name: test/$CI_COMMIT_REF_NAME
     url: https://$CI_COMMIT_REF_NAME.test.ucc.asn.au
+    on_stop: stop_testing
   except:
       - master
 
@@ -66,7 +67,7 @@ deploy_staging:
   only:
       - master
 
-stop_test:
+stop_testing:
   stage: deploy
   variables:
     GIT_STRATEGY: none
