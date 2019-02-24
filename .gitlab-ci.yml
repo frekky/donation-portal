@@ -1,43 +1,27 @@
 stages:
-    - deploy
+  - test
+  - deploy
 
 before_script:
-    script:
-        - echo "preparing environment"
-        - virtualenv env
-        - . env/bin/activate
-        - pip install -r pip-packages.txt
-
-deploy_staging:
-    stage: deploy
-    script:
-        - echo "Deploy to staging server"
-    environment:
-        name: stage
-        url: https://portal.ucc.asn.au/stage
-    only:
-        - master
-
-    deploy_prod:
-    stage: deploy
-    script:
-        - echo "Deploy to production server"
-    environment:
-        name: production
-        url: https://portal.ucc.asn.au
-    when: manual
-    only:
-        - master
+  - echo "preparing environment"
+  - virtualenv env
+  - . env/bin/activate
+  - pip install -r pip-packages.txt
+  
+  
+test:
+  stage: test
+  script:
+    - echo "Running tests"
 
 deploy_test:
-    stage: deploy
-    script:
-        - echo "Deploy to test"
-	- . venv/bin/activate
+  stage: deploy
+  script:
+    - echo "Deploy to test"
+    - . venv/bin/activate
     - python3 src/manage.py makemigrations
     - python3 src/manage.py migrate --run-syncdb
     - ln -s /etc/uwsgi/vassals/test.skel /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini
-
   environment:
     name: test/$CI_COMMIT_REF_NAME
     url: https://$CI_COMMIT_REF_NAME.test.ucc.asn.au
