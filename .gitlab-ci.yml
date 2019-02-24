@@ -19,7 +19,8 @@ deploy_test:
   tags:
     - test
   variables:
-    CI_DEBUG_TRACE: "true"
+    DB_ENGINE : "django.db.backends.sqlite3"
+    DB_NAME : os.path.join(ROOT_DIR, '.db', 'members.db')
   script:
     - echo "Deploy to test"
     - rm -f /var/www/test/$CI_COMMIT_REF_NAME
