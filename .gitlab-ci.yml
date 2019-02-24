@@ -75,6 +75,7 @@ stop_testing:
   environment:
     name: test/$CI_COMMIT_REF_NAME
     action: stop
+  except: master
   script:
     - rm -f /var/www/test/$CI_COMMIT_REF_NAME
     - rm -f /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini
