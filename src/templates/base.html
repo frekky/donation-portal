@@ -2,96 +2,115 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- MemberDB base template -->
-    <title>{% block title %}UCC MemberDB{% endblock %}</title>
-    <link rel="shortcut icon" type="image/png" href="{% static 'ucc-logo.png' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static "memberdb.css" %}">
-    {% block prestyle %}{% endblock %}
-    <link rel="stylesheet" type="text/css" href="{% static "shared.css" %}">
-    {% block extrahead %}{% endblock %}
-    {% block extrastyle %}{% endblock %}
-    {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
+	<!-- MemberDB base template -->
+	<title>{% block title %}UCC MemberDB{% endblock %}</title>
+	<link rel="shortcut icon" type="image/png" href="{% static 'ucc-logo.png' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static "memberdb.css" %}">
+	{% block prestyle %}{% endblock %}
+	<link rel="stylesheet" type="text/css" href="{% static "shared.css" %}">
+	{% block extrahead %}{% endblock %}
+	{% block extrastyle %}{% endblock %}
+	{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
 </head>
 
 <body {% block bodyattrs %}{% endblock %}>
 
+
 <!-- Container -->
 <div id="container">
+	{% block header_div %}<!-- Header -->
+	<div id="header">
+		{% block navbar %}
+		<nav>
+			{% block branding %}
+			<a class="logo" title="UCCPortal homepage">
+				<span></span>
+			</a>
+			{% endblock %}
 
-    {% block header_div %}<!-- Header -->
-    <div id="header">
-        {% block navbar %}
-        <nav>
-            {% block branding %}
-            <a class="logo" title="UCCPortal homepage">
-                <span></span>
-            </a>
-            {% endblock %}
-            
-            {# fancy automatic navbar thing from https://stackoverflow.com/questions/39639264 #}
-            {% with url_name=request.resolver_match.url_name %}
-            {% if request.member %}
-            <a class="navtab {% if url_name == 'home' %}active{% endif %}" href="{% url "memberdb:home" %}">Member home</a>
-            {% endif %}
-            <a class="navtab {% if url_name == 'register' %}active{% endif %}" href="{% url "memberdb:register" %}">Register</a>
+			{# fancy automatic navbar thing from https://stackoverflow.com/questions/39639264 #}
+			{% with url_name=request.resolver_match.url_name %}
+			{% if request.member %}
+			<a class="navtab {% if url_name == 'home' %}active{% endif %}" href="{% url "memberdb:home" %}">Member home</a>
+			{% endif %}
+			<a class="navtab {% if url_name == 'register' %}active{% endif %}" href="{% url "memberdb:register" %}">Register</a>
 
-            {% if not request.user.is_authenticated %}
-            <a class="navtab {% if url_name == 'login' %}active{% endif %}" href="{% url "memberdb:login" %}">Login</a>
-            {% else %}
-            <a class="navtab {% if url_name == 'renew' %}active{% endif %}" href="{% url "memberdb:renew" %}">Renew membership</a>
+			{% if not request.user.is_authenticated %}
+			<a class="navtab {% if url_name == 'login' %}active{% endif %}" href="{% url "memberdb:login" %}">Login</a>
+			{% else %}
+			<a class="navtab {% if url_name == 'renew' %}active{% endif %}" href="{% url "memberdb:renew" %}">Renew membership</a>
 
-            {% if request.user.is_staff %}
-            <a class="navtab {% block adminactive %}{% endblock %}" href="{% url "admin:index" %}">Admin site</a>
-            {% endif %}
+			{% if request.user.is_staff %}
+			<a class="navtab {% block adminactive %}{% endblock %}" href="{% url "admin:index" %}">Admin site</a>
+			{% endif %}
 
-            {% endif %}
+			{% endif %}
 
-            {% if request.user.is_authenticated or request.member %}
-            <a class="navtab {% if url_name == 'logout' %}active{% endif %}" href="{% url "memberdb:logout" %}">Logout</a>
-            {% endif %}
-            {% endwith %}
-        </nav>
-        {% endblock %}
+			{% if request.user.is_authenticated or request.member %}
+			<a class="navtab {% if url_name == 'logout' %}active{% endif %}" href="{% url "memberdb:logout" %}">Logout</a>
+			{% endif %}
+			{% endwith %}
+		</nav>
+		{% endblock %}
 
-        {% block header %}{% endblock %}
-        
-    </div>
-    {% endblock %}<!-- END Header -->
-    {% block breadcrumbs %}{% endblock %}
-    {% block messages %}{% if messages %}
-    <ul class="messagelist">{% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
-    {% endfor %}</ul>
-    {% endif %}{% endblock messages %}
+		{% block header %}{% endblock %}
 
-    <!-- Content -->
-    <div id="content">
-        {% block pretitle %}{% endblock %}
-        {% block content_title %}<h1></h1>{% endblock %}
-        {% block content %}
-        {% endblock %}
-        <!-- sidebar -->
-        {% block sidebar %}{% endblock %}
-        <br class="clear">
-    </div>
-    <!-- END Content -->
+	</div>
+	{% endblock %}<!-- END Header -->
+	{% block breadcrumbs %}{% endblock %}
+	{% block messages %}{% if messages %}
+	<ul class="messagelist">{% for message in messages %}
+		<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+	{% endfor %}</ul>
+	{% endif %}{% endblock messages %}
 
-    <!-- Footer -->
-    {% block footer %}
-    <div id="footer">
-        <p>
-            The University Computer Club Inc.
-            ABN: 98 843 368 069
-        </p>
-        <div class="linkslist">
-            <a href="https://www.ucc.asn.au">main website</a>&#8226;
-            <a href="https://wiki.ucc.asn.au">UCC wiki</a>&#8226;
-            <a href="https://www.ucc.asn.au/aboutucc/contact.ucc">contact us</a>&#8226;
-            <a href="https://gitlab.ucc.asn.au/frekk/uccportal">source code</a>
-        </div>
-    </div>
-    {% endblock %}
-    <!-- END Footer -->    
+	<!-- Content -->
+	<div id="content">
+		{% block pretitle %}{% endblock %}
+		{% block content_title %}<h1></h1>{% endblock %}
+		{% block content %}
+		{% endblock %}
+		<!-- sidebar -->
+		{% block sidebar %}{% endblock %}
+		<br class="clear">
+	</div>
+	<!-- END Content -->
+
+	<!-- Footer -->
+	{% block footer %}
+	<div id="footer">
+		<p>
+			The University Computer Club Inc.
+			ABN: 98 843 368 069
+		</p>
+		<div class="linkslist">
+			<a href="https://www.ucc.asn.au">main website</a>&#8226;
+			<a href="https://wiki.ucc.asn.au">UCC wiki</a>&#8226;
+			<a href="https://www.ucc.asn.au/aboutucc/contact.ucc">contact us</a>&#8226;
+			<a href="https://gitlab.ucc.asn.au/frekk/uccportal">source code</a>
+		</div>
+	</div>
+	{% endblock %}
+	<!-- END Footer -->
+{% if DEPLOYMENT_ENV != "PROD" %}
+<div class="watermark">{{DEPLOYMENT_ENV}}</div>
+<style>
+  .watermark {
+	position: absolute;
+	transform: translate(-50%, -50%);
+	opacity: 0.3;
+	{% if DEPLOYMENT_ENV == "STAGE" %}
+	color: RED; 
+	{% else %}
+	color: GREEN; 
+	{% endif %}
+	font-size: 15em;
+	top: 50%;
+	left: 50%;
+	pointer-events: none;
+  }
+</style>
+{%endif %}
 </div>
 <!-- END Container -->
 
