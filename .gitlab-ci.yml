@@ -53,9 +53,9 @@ deploy_staging:
     DEPLOY_HOST : staging.test.ucc.asn.au
   script:
     - echo "Deploy to staging"
-    - rm -f /var/www/stage/$CI_PROJECT_NAME
+    - rm -f /services/$CI_PROJECT_NAME
     - rm -f /etc/uwsgi/vassals/stage.ini
-    - ln -srT ./ /var/www/stage/$CI_PROJECT_NAME
+    - ln -srT ./ /services/$CI_PROJECT_NAME
     - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
     - python src/manage.py collectstatic
     - python src/manage.py makemigrations
