@@ -16,7 +16,8 @@ run_tests:
   stage: test
   script:
     - echo "Running tests"
-    - python src/manage.py test
+    - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
+    - python src/manage.py check
 
 deploy_testing:
   stage: deploy
