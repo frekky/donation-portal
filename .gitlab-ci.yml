@@ -26,6 +26,7 @@ deploy_testing:
   variables:
     DB_NAME : /var/www/test/$CI_COMMIT_REF_NAME/.db/members.db
     DEPLOY_HOST : $CI_COMMIT_REF_NAME.test.ucc.asn.au
+    SHORT_ENV_NAME : TEST
   script:
     - echo "Deploy to test"
     - rm -f /var/www/test/$CI_COMMIT_REF_NAME
@@ -44,7 +45,7 @@ deploy_testing:
     on_stop: stop_testing
   except:
       - master
-
+  
 deploy_staging:
   stage: deploy
   tags:
@@ -52,6 +53,7 @@ deploy_staging:
   variables:
     DB_NAME : /var/www/stage/.db/members.db
     DEPLOY_HOST : stage.test.ucc.asn.au
+    SHORT_ENV_NAME : STAGE
   script:
     - echo "Deploy to staging"
     - rm -f /services/$CI_PROJECT_NAME

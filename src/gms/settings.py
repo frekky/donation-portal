@@ -24,7 +24,7 @@ INSTALLED_APPS = (
 	'memberdb',
 	'import_members',
 	'squarepay',
-	'formtools'
+	'formtools',
 )
 
 MIDDLEWARE = [
@@ -88,6 +88,7 @@ TEMPLATES = [
 				'django.template.context_processors.request',
 				'django.contrib.auth.context_processors.auth',
 				'django.contrib.messages.context_processors.messages',
+				'gms.context_processors.global_settings'
 			],
 		},
 	},
