@@ -36,7 +36,7 @@ DATABASES = {
 SECRET_KEY = '${APP_SECRET}'
 
 # Set this to whatever your ServerName/ServerAlias(es) are
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['${DEPLOY_HOST}']
 
 LOG_LEVEL = 'DEBUG'
 LOG_FILENAME = os.path.join(ROOT_DIR, "django.log")
