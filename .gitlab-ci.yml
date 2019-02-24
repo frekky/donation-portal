@@ -20,6 +20,7 @@ deploy_test:
     - test
   script:
     - echo "Deploy to test"
+    - rm -f /var/www/test/$CI_COMMIT_REF_NAME
     - ln -s . /var/www/test/$CI_COMMIT_REF_NAME
     - python src/manage.py makemigrations
     - python src/manage.py migrate --run-syncdb
