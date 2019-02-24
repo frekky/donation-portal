@@ -33,7 +33,7 @@ DATABASES = {
 }
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '${SECRET_KEY}'
+SECRET_KEY = '${APP_SECRET}'
 
 # Set this to whatever your ServerName/ServerAlias(es) are
 ALLOWED_HOSTS = []
@@ -48,7 +48,7 @@ from django_auth_ldap.config import LDAPSearch, ActiveDirectoryGroupType, LDAPGr
 LDAP_BASE_DN = 'DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au'
 LDAP_USER_SEARCH_DN = 'CN=Users,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au'
 LDAP_BIND_DN = 'CN=uccportal,CN=Users,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au'
-LDAP_BIND_SECRET = ""
+LDAP_BIND_SECRET = "${LDAP_SECRET}"
 
 # this could be ad.ucc.gu.uwa.edu.au but that doesn't resolve externally -
 # useful for testing, but should be changed in production so failover works
