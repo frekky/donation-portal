@@ -50,7 +50,7 @@ deploy_staging:
     - stage
   variables:
     DB_NAME : /var/www/stage/.db/members.db
-    DEPLOY_HOST : staging.test.ucc.asn.au
+    DEPLOY_HOST : stage.test.ucc.asn.au
   script:
     - echo "Deploy to staging"
     - rm -f /services/$CI_PROJECT_NAME
