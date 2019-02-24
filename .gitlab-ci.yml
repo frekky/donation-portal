@@ -32,6 +32,7 @@ deploy_testing:
     - rm -f /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini
     - mkdir .db
     - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
+    - chmod 600 src/gms/settings_local.py
     - ln -srT ./ /var/www/test/$CI_COMMIT_REF_NAME
     - python src/manage.py collectstatic
     - python src/manage.py makemigrations
@@ -57,6 +58,7 @@ deploy_staging:
     - rm -f /etc/uwsgi/vassals/stage.ini
     - ln -srT ./ /services/$CI_PROJECT_NAME
     - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
+    - chmod 600 src/gms/settings_local.py
     - python src/manage.py collectstatic
     - python src/manage.py makemigrations
     - python src/manage.py migrate --run-syncdb
