@@ -21,6 +21,7 @@ deploy_test:
   variables:
     DB_ENGINE : django.db.backends.sqlite3
     DB_NAME : /var/www/test/$CI_COMMIT_REF_NAME/.db/members.db
+    DEPLOY_HOST : $CI_COMMIT_REF_NAME.test.ucc.asn.au
   script:
     - echo "Deploy to test"
     - rm -f /var/www/test/$CI_COMMIT_REF_NAME
