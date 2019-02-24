@@ -52,7 +52,7 @@ deploy_staging:
     - stage
   variables:
     DB_NAME : /var/www/stage/.db/members.db
-    DEPLOY_HOST : staging.test.ucc.asn.au
+    DEPLOY_HOST : stage.test.ucc.asn.au
     SHORT_ENV_NAME : STAGE
   script:
     - echo "Deploy to staging"
