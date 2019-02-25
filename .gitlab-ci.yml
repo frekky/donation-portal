@@ -1,0 +1,86 @@
+stages:
+  - test
+  - deploy
+
+variables:
+  DB_ENGINE : django.db.backends.sqlite3
+
+before_script:
+  - echo "preparing environment"
+  - virtualenv env -p `which python3`
+  - . env/bin/activate
+  - pip install -r pip-packages.txt
+  
+  
+run_tests:
+  stage: test
+  script:
+    - echo "Running tests"
+    - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
+    - python src/manage.py check
+
+deploy_testing:
+  stage: deploy
+  tags:
+    - test
+  variables:
+    DB_NAME : /var/www/test/$CI_COMMIT_REF_NAME/.db/members.db
+    DEPLOY_HOST : $CI_COMMIT_REF_NAME.test.ucc.asn.au
+    SHORT_ENV_NAME : TEST
+  script:
+    - echo "Deploy to test"
+    - rm -f /var/www/test/$CI_COMMIT_REF_NAME
+    - rm -f /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini
+    - mkdir .db
+    - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
+    - chmod 600 src/gms/settings_local.py
+    - ln -srT ./ /var/www/test/$CI_COMMIT_REF_NAME
+    - python src/manage.py collectstatic
+    - python src/manage.py makemigrations
+    - python src/manage.py migrate --run-syncdb
+    - ln -s /etc/uwsgi/vassals/test.skel /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini
+  environment:
+    name: test/$CI_COMMIT_REF_NAME
+    url: https://$CI_COMMIT_REF_NAME.test.ucc.asn.au
+    on_stop: stop_testing
+  except:
+      - master
+  
+deploy_staging:
+  stage: deploy
+  tags:
+    - stage
+  variables:
+    DB_NAME : /var/www/stage/.db/members.db
+    DEPLOY_HOST : stage.test.ucc.asn.au
+    SHORT_ENV_NAME : STAGE
+  script:
+    - echo "Deploy to staging"
+    - rm -f /services/$CI_PROJECT_NAME
+    - rm -f /etc/uwsgi/vassals/stage.ini
+    - ln -srT ./ /services/$CI_PROJECT_NAME
+    - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
+    - chmod 600 src/gms/settings_local.py
+    - python src/manage.py collectstatic
+    - python src/manage.py makemigrations
+    - python src/manage.py migrate --run-syncdb
+    - ln -s /etc/uwsgi/vassals/stage.skel /etc/uwsgi/vassals/stage.ini
+  environment:
+    name: stage
+    url: https://stage.test.ucc.asn.au
+  only:
+      - master
+
+stop_testing:
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  when: manual
+  environment:
+    name: test/$CI_COMMIT_REF_NAME
+    action: stop
+  except: 
+    - master
+  script:
+    - rm -f /var/www/test/$CI_COMMIT_REF_NAME
+    - rm -f /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini

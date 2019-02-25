@@ -9,6 +9,7 @@ from django.views.generic.base import View
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.mixins import AccessMixin
 from django.utils import timezone
+from formtools.wizard.views import SessionWizardView
 
 from .models import Member, IncAssocMember, Membership, MEMBERSHIP_TYPES, TokenConfirmation
 from .forms import MemberHomeForm
@@ -80,6 +81,25 @@ class MyUpdateView(UpdateView):
         kwargs.update({'request': self.request})
         return kwargs
 
+class MyWizardView(SessionWizardView):
+    object = None
+
+    def get_object(self):
+        if (not self.object is None):
+            return self.object
+        try:
+            sobj = super().get_object()
+            if (not sobj is None):
+                return sobj
+        except:
+            pass
+        return None
+
+    def get_form_kwargs(self, step, **kwargs):
+        kwargs.update(super().get_form_kwargs())
+        kwargs.update({'request': self.request})
+        return kwargs
+
 class MemberHomeView(MemberAccessMixin, MyUpdateView):
     model = Member
     template_name = 'home.html'
@@ -128,7 +148,7 @@ class MemberTokenView(View):
             try:
                 member = Member.objects.get(
                     login_token=kwargs['member_token'],
-                    username=kwargs['username'],
+                    id=kwargs['id'],
                     created__gte=week_ago
                 )
             except Member.DoesNotExist:
