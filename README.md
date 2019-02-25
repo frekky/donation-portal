@@ -11,25 +11,12 @@ Features
 - Registration form for new members to sign themselves up
 - Connects to Active Directory to authenticate existing users & allow them to renew their own membership
 - Administrative interface to approve pending memberships
+- Online payment of membership fees using [Square Payment Form](https://docs.connect.squareup.com/payments/sqpaymentform/sqpaymentform-overview)
 
 Stuff to do
 -----------
 
-- Online payment of membership fees using [Square Payment Form](https://docs.connect.squareup.com/payments/sqpaymentform/sqpaymentform-overview)
-- Email confirmation & payment receipts
-- Automatic member account creation in Active Directory (after membership approved)
-- Validating student numbers in ID field (also via email)
-- Add dispense account balance online with Square paymentform
-- Mailing list subscription management
-- Change first name & last name to just "Real Name"
-    - then change display name to "Preferred name"
-    - delete sn & firstName attributes in AD
-- Remove display name as editable field or make it only editable once it syncs with AD
-- Actions to rightmost column
-- Redirect to changelist
-- Add reject membership button to admin actions
-- Remove admin site banner / header & change colour scheme
-- Pending memberships badge on admin index
+See the [Issue tracker](https://gitlab.ucc.asn.au/frekk/uccportal/issues/) on GitLab
 
 Workflow Design
 ---------------
