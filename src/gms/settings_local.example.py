@@ -54,7 +54,7 @@ LDAP_BIND_SECRET = "${LDAP_SECRET}"
 
 # this could be ad.ucc.gu.uwa.edu.au but that doesn't resolve externally -
 # useful for testing, but should be changed in production so failover works
-AUTH_LDAP_SERVER_URI = 'ldaps://ad.ucc.gu.uwa.edu.au/'
+AUTH_LDAP_SERVER_URI = 'ldaps://ad.ucc.gu.uwa.edu.au'
 
 # This is also a bad idea, should be changed in production
 AUTH_LDAP_GLOBAL_OPTIONS = {
