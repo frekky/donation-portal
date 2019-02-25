@@ -12,15 +12,6 @@ from memberdb.models import Member, Membership, get_membership_type
 from memberdb.forms import MyModelForm
 from memberdb.views import MyUpdateView
 
-def make_pending_membership(member):
-    # check if this member already has a pending membership
-    ms = Membership.objects.filter(member=member, approved__exact=False).first()
-    if (ms is None):
-        ms = Membership(member=member, approved=False)
-    ms.date_submitted = timezone.now()
-    ms.membership_type = get_membership_type(member)
-    return ms
-
 """
 inline admin change list action buttons
 see https://medium.com/@hakibenita/how-to-add-custom-action-buttons-to-django-admin-8d266f5b0d41

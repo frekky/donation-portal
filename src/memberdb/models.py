@@ -3,6 +3,7 @@ from django.db.models import F
 from django.core.validators import RegexValidator
 from django.core.management.utils import get_random_string
 from django.urls import reverse
+from django.utils import timezone
 
 from squarepay.dispense import get_item_price
 import subprocess
@@ -98,6 +99,14 @@ def get_membership_type(member):
 			break
 	return best
 
+def make_pending_membership(member):
+    # check if this member already has a pending membership
+    ms = Membership.objects.filter(member=member, approved__exact=False).first()
+    if (ms is None):
+        ms = Membership(member=member, approved=False)
+    ms.date_submitted = timezone.now()
+    ms.membership_type = get_membership_type(member)
+    return ms
 
 def make_token():
 	return get_random_string(128)

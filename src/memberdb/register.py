@@ -13,10 +13,9 @@ from django import forms
 from squarepay.models import MembershipPayment
 from squarepay.dispense import get_item_price
 
-from .models import Member, Membership, get_membership_choices, MEMBERSHIP_TYPES
+from .models import Member, Membership, get_membership_choices, make_pending_membership, MEMBERSHIP_TYPES
 from .forms import MyModelForm
 from .views import MyUpdateView
-from .approve import make_pending_membership
 
 """
 First step: enter an email address and some details (to fill at least a Member model) to create a pending membership.
