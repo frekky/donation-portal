@@ -108,24 +108,13 @@ class MemberHomeView(MemberAccessMixin, MyUpdateView):
     def get_object(self):
         return self.request.member
 
-    def get_membership_context(self, ms):
-        """ gets the per-membership-record context data """
-        return {
-            'id': ms.id,
-            'type': MEMBERSHIP_TYPES[ms.membership_type]['desc'],
-            'submitted': ms.date_submitted.strftime('%Y-%m-%d %H:%M'),
-            'paid': ms.date_paid.strftime('%Y-%m-%d %H:%M') if ms.date_paid is not None else None,
-            'approved': ms.date_approved.strftime('%Y-%m-%d %H:%M') if ms.approved else None,
-            'is_approved': ms.approved,
-        }
-
     def get_context_data(self):
         d = super().get_context_data()
         m = self.get_object()
 
         if m is not None:
             # get a list of all the membership records associated with this member
-            ms_list = [ self.get_membership_context(ms) for ms in m.memberships.all() ]
+            ms_list = m.memberships.all()
             d.update({
                 'memberships': ms_list,
             })

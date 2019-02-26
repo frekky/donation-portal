@@ -100,13 +100,18 @@ def get_membership_type(member):
 	return best
 
 def make_pending_membership(member):
-    # check if this member already has a pending membership
-    ms = Membership.objects.filter(member=member, approved__exact=False).first()
-    if (ms is None):
-        ms = Membership(member=member, approved=False)
-    ms.date_submitted = timezone.now()
-    ms.membership_type = get_membership_type(member)
-    return ms
+	""" creates or updates and returns a pending membership for the given member """
+	latest = member.get_last_renewal()
+	if latest is None or latest.date_submitted.year != timezone.now().year:
+		# create a Membership if none exists already for this year
+		latest = Membership(member=member)
+		latest.membership_type = get_membership_type(member)
+
+	# otherwise update the existing membership and mark as pending
+	latest.approved = False
+	latest.date_submitted = timezone.now()
+
+	return latest
 
 def make_token():
 	return get_random_string(128)
@@ -162,8 +167,6 @@ class Member (IncAssocMember):
 	Note: Privacy laws are a thing, unless people allow it then we cannot provide this info to members.
 	"""
 
-
-
 	# data to be entered by user and validated (mostly) manually
 	display_name    = models.CharField ('Display name', max_length=200)
 	username        = models.SlugField ('Username', max_length=32, null=True, blank=True, unique=False, validators=[RegexValidator(regex='^[a-z0-9._-]*$')])
@@ -181,6 +184,10 @@ class Member (IncAssocMember):
 	guild_confirm   = models.BooleanField ('Guild status confirmed', null=False, editable=False, default=False)
 
 	has_account		= models.BooleanField ('Has AD account', null=False, editable=False, default=False)
+
+	def get_last_renewal(self):
+		""" returns the most recently submitted Membership object """
+		return self.memberships.order_by('-date_submitted').first()
 
 	# account info
 	def get_uid(self):
@@ -210,7 +217,7 @@ class Membership (models.Model):
 	payment_method  = models.CharField ('Payment method', max_length=10, blank=True, null=True, choices=PAYMENT_METHODS, default=None)
 	approved        = models.BooleanField ('Membership approved', default=False)
 	approver        = models.ForeignKey (Member, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_memberships')
-	date_submitted  = models.DateTimeField ('Date signed up')
+	date_submitted  = models.DateTimeField ('Date signed up', default=timezone.now)
 	date_paid       = models.DateTimeField ('Date of payment', blank=True, null=True)
 	date_approved   = models.DateTimeField ('Date approved', blank=True, null=True)
 
@@ -219,6 +226,9 @@ class Membership (models.Model):
 
 	def get_dispense_item(self):
 		return MEMBERSHIP_TYPES[self.membership_type]['dispense']
+
+	def get_pretty_type(self):
+		return MEMBERSHIP_TYPES[self.membership_type]['desc']
 
 	class Meta:
 		verbose_name = "Membership renewal record"

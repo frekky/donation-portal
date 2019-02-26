@@ -1,0 +1,44 @@
+{% load static %}
+<table class="membership-details">
+	<tr class="{% cycle 'row1' 'row2' as rcl %}">
+		<th>Membership type</th>
+		<th>Submitted / Updated</th>
+		<th>Paid</th>
+		<th>Approved</th>
+		<th>Actions</th>
+	</tr>
+	{% for ms in memberships %}
+	<tr class="{% cycle rcl %}">
+		<td>
+			{{ ms.get_pretty_type }}
+		</td>
+		<td>
+			{{ ms.date_submitted |date:"Y-m-d H:i" }}
+		</td>
+		<td>
+			{% if ms.date_paid %}
+			<img src="{% static 'admin/img/icon-yes.svg' %}" alt="yes">&nbsp; {{ ms.date_paid |date:"Y-m-d H:i" }}
+			{% else %}
+			<img src="{% static 'admin/img/icon-no.svg' %}" alt="no">&nbsp; Not paid yet
+			{% endif %}
+		</td>
+		<td>
+			{% if ms.date_approved and ms.approved %}
+			<img src="{% static 'admin/img/icon-yes.svg' %}" alt="yes">&nbsp; {{ ms.date_approved |date:"Y-m-d H:i" }}
+			{% elif ms.date_approved and not ms.approved %}
+			<img src="{% static 'admin/img/icon-no.svg' %}" alt="no">&nbsp; Rejected: {{ ms.date_approved |date:"Y-m-d H:i" }}
+			{% else %}
+			<img src="{% static 'admin/img/icon-unknown.svg' %}" alt="?">&nbsp; Not approved yet
+			{% endif %}
+		</td>
+		<td>
+			<!-- membership actions -->
+			{% if not ms.date_paid %}
+				<a class="button" href="{% url 'squarepay:pay_membership' ms.id %}">Pay now</a>
+			{% else %}
+				-
+			{% endif %}
+		</td>
+	</tr>
+	{% endfor %}
+</table>

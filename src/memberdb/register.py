@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 from django.contrib import messages
 from django import forms
 
@@ -44,7 +45,7 @@ class RegisterRenewForm(MyModelForm):
 			if (self['email_address'].value() != self['confirm_email'].value()):
 				self.add_error('email_address', 'Email addresses must match.')
 			if (self['email_address'].value().lower().split('@')[1] in ["ucc.asn.au", "ucc.gu.uwa.edu.au"]):
-					self.add_error('email_address', 'Contact address cannot be an UCC address.')
+				self.add_error('email_address', 'Contact address cannot be an UCC address.')
 		except:
 			pass
 		super().clean();
@@ -57,8 +58,8 @@ class RegisterRenewForm(MyModelForm):
 		# must save otherwise membership creation will fail
 		m.save()
 
-		# now create a corresponding Membership (marked as pending / not accepted, mostly default values)
 		ms = make_pending_membership(m)
+		ms.membership_type = self.cleaned_data['membership_type']
 
 		if (commit):
 			ms.save();
@@ -112,13 +113,18 @@ class RegisterView(MyUpdateView):
 	template_name = 'register.html'
 	form_class = RegisterForm
 	model = Member
-	can_create = False
 
-	"""
-	called when valid form data has been POSTed
-	invalid form data simply redisplays the form with validation errors
-	"""
+	def get_context_data(self, **kwargs):
+		""" update view context with current renewal year """
+		context = super().get_context_data(**kwargs)
+		context['year'] = timezone.now().year
+		return context
+
 	def form_valid(self, form):
+		"""
+		called when valid form data has been POSTed
+		invalid form data simply redisplays the form with validation errors
+		"""
 		# save the member data and get the Member instance
 		m, ms = form.save()
 		messages.success(self.request, 'Your registration has been submitted.')
@@ -139,29 +145,37 @@ def thanks_view(request, member, ms):
 	}
 	return render(request, 'thanks.html', context)
 
-class RenewView(LoginRequiredMixin, MyUpdateView):
+class RenewView(LoginRequiredMixin, RegisterView):
 	template_name = 'renew.html'
 	form_class = RenewForm
 	model = Member
 
 	def get_object(self):
+		""" try to get a pending renewal for this year (to edit & resubmit) otherwise create a new one """
 		u = self.request.user
+		m = self.request.member
 
-		obj = Member.objects.filter(username__exact=u.username).first()
-		if (obj is None):
-			# make a new Member object and prefill some data
-			obj = Member(username=u.username)
-			obj.first_name = u.first_name
-			obj.last_name = u.last_name
-			obj.email_address = u.email
-			obj.login_token = None # renewing members won't need this
-		return obj
+		if m is None:
+			# this member is not in the DB yet - make a new Member object and prefill some data
+			m = Member(username=u.username)
+			m.first_name = u.first_name
+			m.last_name = u.last_name
+			m.email_address = u.email
+			m.login_token = None # renewing members won't need this, make sure it is null for security
+		return m
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context.update({
-			'is_new': Member.objects.filter(username__exact=self.request.user.username).count() == 0,
-		})
+		last_renewal = self.object.get_last_renewal()
+
+		# renew.html says whether a record exists in the DB or not
+		context['is_new'] = self.request.member is None
+
+		# let the template check if user has already renewed this year so it displays a warning
+		if last_renewal is not None:
+			context['last_renewal'] = last_renewal.date_submitted.year
+			context['memberships'] = [last_renewal]
+
 		return context
 
 	def form_valid(self, form):
