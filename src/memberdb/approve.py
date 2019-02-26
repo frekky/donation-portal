@@ -32,6 +32,7 @@ class MembershipApprovalForm(MyModelForm):
 
 		# override the model membership_type field so we display all the options with prices
 		self.fields['membership_type'].choices = get_membership_choices()
+		self.fields['payment_confirm'].initial = (self.instance.date_paid is not None)
 
 	def clean(self):
 		"""
@@ -50,9 +51,13 @@ class MembershipApprovalForm(MyModelForm):
 		data['date_approved'] = now
 
 		if (data['payment_confirm'] == True):
-			if (data['payment_method'] == ''):
-				self.add_error('payment_method', 'Please select a payment method')
-			data['date_paid'] = now
+			if data['payment_method'] == self.instance.payment_method and data['payment_confirm'] == (self.instance.date_paid is not None):
+				# check if the payment was already made, preserve the date_paid
+				data['date_paid'] = self.instance.date_paid
+			else:
+				if (data['payment_method'] == ''):
+					self.add_error('payment_method', 'Please select a payment method')
+				data['date_paid'] = now
 		else:
 			data['date_paid'] = None
 

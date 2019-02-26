@@ -109,6 +109,7 @@ def make_pending_membership(member):
 
 	# otherwise update the existing membership and mark as pending
 	latest.approved = False
+	latest.date_approved = None
 	latest.date_submitted = timezone.now()
 
 	return latest
