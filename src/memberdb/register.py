@@ -181,7 +181,7 @@ class RenewView(LoginRequiredMixin, RegisterView):
 	def form_valid(self, form):
 		m, ms = form.save()
 		messages.success(self.request, 'Your membership renewal has been submitted.')
-		if self.request.user.is_staff:
-			return HttpResponseRedirect(reverse("admin:membership-approve",args=[ms.pk]))
-		else:
-			return HttpResponseRedirect(reverse("memberdb:home"))
+
+		# always redirect to member home on renewal - you can't renew for someone else, and it
+		# is confusing if you get redirected to the admin site
+		return HttpResponseRedirect(reverse("memberdb:home"))
