@@ -4,6 +4,7 @@ This file implements the member-facing registration workflow. See ../../README.m
 import subprocess
 from subprocess import CalledProcessError, TimeoutExpired
 from os import path
+from datetime import datetime
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -128,7 +129,7 @@ class RenewForm(RegisterRenewForm):
 	def save(self, commit=True):
 		m, ms = super().save(commit=False)
 		m.username = self.request.user.username
-		if ms.date_paid is None and ms.payment_method is None:
+		if ms.date_paid is None and (ms.payment_method is None or ms.payment_method == ''):
 			paid = has_paid_dispense(ms)
 			if paid is not None:
 				ms.date_paid = paid
