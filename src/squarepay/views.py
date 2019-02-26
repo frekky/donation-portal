@@ -97,7 +97,6 @@ class MembershipPaymentView(MemberAccessMixin, PaymentFormMixin, DetailView):
             return None
         except MembershipPayment.DoesNotExist as e:
             # found an unpaid membership, but no payment record exists yet
-            messages.success(self.request, "Created payment record for as-yet unpaid membership")
             return create_membership_payment(ms)
         return payment
 
