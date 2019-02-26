@@ -1,6 +1,9 @@
 """
 This file implements the member-facing registration workflow. See ../../README.md
 """
+import subprocess
+from subprocess import CalledProcessError, TimeoutExpired
+from os import path
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -10,6 +13,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.contrib import messages
 from django import forms
+from django.conf import settings
 
 from squarepay.models import MembershipPayment
 from squarepay.dispense import get_item_price
@@ -17,6 +21,28 @@ from squarepay.dispense import get_item_price
 from .models import Member, Membership, get_membership_choices, make_pending_membership, MEMBERSHIP_TYPES
 from .forms import MyModelForm
 from .views import MyUpdateView
+
+def has_paid_dispense(membership):
+	script = settings.BASE_DIR + "/memberdb/has_paid_dispense.sh"
+
+	cmd = [script, membership.member.username, membership.get_dispense_item()]
+	#log.info("has_paid_dispense: " + str(cmd))
+	try:
+		# get a string containing the output of the program
+		# should be a datestring like "Feb 25 13:48:06"
+		res = subprocess.check_output(cmd, timeout=4, universal_newlines=True)
+		date = datetime.strptime(res, "%b %d %H:%M:%S")
+		return date
+	except CalledProcessError as e:
+		#log.warning("has_paid_dispense returned error code %d, output: '%s'" % (e.returncode, e.output))
+		pass
+	except TimeoutExpired as e:
+		#log.error(e)
+		pass
+	except ValueError:
+		#log.warning("cannot parse date '%s'" % res)
+		pass
+	return None
 
 """
 First step: enter an email address and some details (to fill at least a Member model) to create a pending membership.
@@ -55,6 +81,8 @@ class RegisterRenewForm(MyModelForm):
 		m = super().save(commit=False)
 		if (m.display_name == ""):
 			m.display_name = "%s %s" % (m.first_name, m.last_name);
+		m.has_account = m.get_uid() != None
+
 		# must save otherwise membership creation will fail
 		m.save()
 
@@ -100,7 +128,12 @@ class RenewForm(RegisterRenewForm):
 	def save(self, commit=True):
 		m, ms = super().save(commit=False)
 		m.username = self.request.user.username
-		m.has_account = m.get_uid() != None
+		if ms.date_paid is None and ms.payment_method is None:
+			paid = has_paid_dispense(ms)
+			if paid is not None:
+				ms.date_paid = paid
+				ms.payment_method = 'dispense'
+
 		if (commit):
 			m.save()
 			ms.save()
