@@ -122,6 +122,11 @@ class MembershipAdmin(admin.ModelAdmin):
 
 	# called per record, returns HTML to display under the "Actions" column
 	def member_actions(self, ms):
+		"""
+		inline admin change list action buttons
+		see https://medium.com/@hakibenita/how-to-add-custom-action-buttons-to-django-admin-8d266f5b0d41
+		and have a look at .admin.MembershipAdmin
+		"""
 		context = {
 			'ms': ms,
 			'member': ms.member,
