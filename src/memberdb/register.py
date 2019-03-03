@@ -4,6 +4,7 @@ This file implements the member-facing registration workflow. See ../../README.m
 import subprocess
 from subprocess import CalledProcessError, TimeoutExpired
 from os import path
+from datetime import datetime
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
