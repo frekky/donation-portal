@@ -13,7 +13,7 @@ from memberdb.models import Membership, MEMBERSHIP_TYPES
 
 from .models import MembershipPayment, CardPayment
 from . import payments
-from .payments import try_capture_payment
+from .payments import try_capture_payment, log
 from .dispense import get_item_price
 
 class PaymentFormMixin:
@@ -94,9 +94,11 @@ class MembershipPaymentView(MemberAccessMixin, PaymentFormMixin, DetailView):
             )
         except Membership.DoesNotExist as e:
             # no unpaid membership found, return
+            log.warning("could not find unpaid membership with id %s" % self.kwargs['pk'])
             return None
         except MembershipPayment.DoesNotExist as e:
             # found an unpaid membership, but no payment record exists yet
+            log.info("creating membership payment for membership id %s" % self.kwargs['pk'])
             return create_membership_payment(ms)
         return payment
 
@@ -126,10 +128,10 @@ class MembershipPaymentView(MemberAccessMixin, PaymentFormMixin, DetailView):
 def create_membership_payment(membership, commit=True):
     """ creates a MembershipPayment object for the given membership """
     # get the amount from dispense
-    price = get_item_price(membership.membership_type)
+    price = get_item_price(membership.get_dispense_item())
     if (price is None or price == 0):
         return None
-    desc = MEMBERSHIP_TYPES[membership.membership_type]['desc']
+    desc = membership.get_pretty_type()
     payment = MembershipPayment(description=desc, amount=price, membership=membership)
 
     if (commit):
