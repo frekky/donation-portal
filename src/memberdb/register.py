@@ -1,6 +1,10 @@
 """
 This file implements the member-facing registration workflow. See ../../README.md
 """
+import subprocess
+from subprocess import CalledProcessError, TimeoutExpired
+from os import path
+from datetime import datetime
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -10,6 +14,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.contrib import messages
 from django import forms
+from django.conf import settings
 
 from squarepay.models import MembershipPayment
 from squarepay.dispense import get_item_price
@@ -55,6 +60,8 @@ class RegisterRenewForm(MyModelForm):
 		m = super().save(commit=False)
 		if (m.display_name == ""):
 			m.display_name = "%s %s" % (m.first_name, m.last_name);
+		m.has_account = m.get_uid() != None
+
 		# must save otherwise membership creation will fail
 		m.save()
 
@@ -100,7 +107,7 @@ class RenewForm(RegisterRenewForm):
 	def save(self, commit=True):
 		m, ms = super().save(commit=False)
 		m.username = self.request.user.username
-		m.has_account = m.get_uid() != None
+
 		if (commit):
 			m.save()
 			ms.save()

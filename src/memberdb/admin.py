@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import path, reverse
@@ -8,17 +10,42 @@ from django.template.loader import render_to_string
 from gms import admin
 
 from memberdb.models import Member, IncAssocMember, Membership
-from memberdb.actions import download_as_csv
+from memberdb.actions import download_as_csv, refresh_dispense_payment
 from memberdb.approve import MembershipApprovalForm, MembershipApprovalAdminView
 from memberdb.account import AccountForm, AccountView
 
 def get_model_url(pk, model_name):
 	return reverse('admin:memberdb_%s_change' % model_name, args=[pk])
 
-"""
-helper mixin to make the admin page display only "View" rather than "Change" or "Add"
-"""
+class MembershipRenewalFilter(admin.SimpleListFilter):
+	""" allow filtering Member records by renewal year / status """
+	""" see https://docs.djangoproject.com/en/2.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter """
+	title = 'Last renewal'
+	parameter_name = 'renewed'
+
+	def lookups(self, request, modeladmin):
+		""" returns a list of tuples """
+		# hardcode the starting year, since otherwise you need a fairly complex query
+		start_year = 2019
+		year = datetime.now().year + 1
+		return [ (str(x), str(x)) for x in range(start_year, year) ] + [ ('none', 'Never renewed') ]
+	
+	def queryset(self, request, queryset):
+		""" returns the filtered queryset based on the value passed to the request """
+		if self.value() is None:
+			# return the original queryset when parameter not specified
+			return queryset
+		
+		if self.value() == 'none':
+			# filter by finding a condition that will never be true for reverse relation (child)
+			# objects that exist, since you can't filter by "has no children"
+			return queryset.filter(memberships__id__isnull=True)
+
+		# filter via attributes on children / reverse relation (hurrah!)
+		return queryset.filter(memberships__date_submitted__year=int(self.value()))
+
 class ReadOnlyModelAdmin(admin.ModelAdmin):
+	""" helper mixin to make the admin page display only "View" rather than "Change" or "Add" """
 	def has_add_permission(self, request):
 		return False
 		
@@ -28,10 +55,10 @@ class ReadOnlyModelAdmin(admin.ModelAdmin):
 	def has_change_permission(self, request, obj=None):
 		return False
 
-"""
-Define the administrative interface for viewing member details required under the Incorporations Act
-"""
 class IAMemberAdmin(ReadOnlyModelAdmin):
+	"""
+	Define the administrative interface for viewing member details required under the Incorporations Act
+	"""
 	readonly_fields = ['__str__', 'updated', 'created']
 	fields = ['first_name', 'last_name', 'email_address', 'updated', 'created']
 	search_fields = ['first_name', 'last_name', 'email_address']
@@ -52,7 +79,7 @@ class MembershipInline(admin.TabularInline):
 
 class MemberAdmin(admin.ModelAdmin):
 	list_display = ['first_name', 'last_name', 'display_name', 'username']
-	list_filter = ['is_guild', 'is_student']
+	list_filter = ['is_guild', 'is_student', MembershipRenewalFilter]
 	readonly_fields = ['member_updated', 'updated', 'created']
 	search_fields = list_display
 	actions = [download_as_csv]
@@ -66,13 +93,10 @@ class MemberAdmin(admin.ModelAdmin):
 		]
 		return custom_urls + urls
 
-
-
 	# add a "go to member" URL into the template context data
 	def change_view(self, request, object_id, form_url='', extra_context={}):
 		extra_context['incassocmember_url'] = get_model_url(object_id, 'incassocmember')
 		return super().change_view(request, object_id, form_url, extra_context=extra_context)
-
 
 	def process_account(self, request, *args, **kwargs):
 		inst = Member.objects.get(pk=kwargs['object_id'])
@@ -82,17 +106,16 @@ class MemberAdmin(admin.ModelAdmin):
 		}
 		return AccountView.as_view(object=inst,admin=self)(request, *args, **kwargs)
 
-
-
-"""
-Define the admin page for viewing normal Member records (all details included) and approving them
-"""
 class MembershipAdmin(admin.ModelAdmin):
+	"""
+	Define the admin page for viewing normal Member records (all details included) and approving them
+	"""
 	list_display = ['membership_info', 'membership_type', 'payment_method', 'approved', 'date_submitted', 'member_actions', ]
 	list_display_links = None
 	list_filter = ['approved']
 	readonly_fields = ['date_submitted']
 	radio_fields = {'payment_method': admin.VERTICAL, 'membership_type': admin.VERTICAL}
+	actions = [refresh_dispense_payment]
 
 	# make the admin page queryset preload the parent records (Member) 
 	def get_queryset(self, request):
@@ -143,10 +166,11 @@ class MembershipAdmin(admin.ModelAdmin):
 	def process_approve(self, request, *args, **kwargs):
 		return MembershipApprovalAdminView.as_view(admin=self)(request, *args, **kwargs)
 
-	"""
-Register multiple ModelAdmins per model. See https://stackoverflow.com/questions/2223375/multiple-modeladmins-views-for-same-model-in-django-admin/2228821
-"""
 class ProxyMembership(Membership):
+	"""
+	Register multiple ModelAdmins per model. 
+	See https://stackoverflow.com/questions/2223375/multiple-modeladmins-views-for-same-model-in-django-admin/2228821
+	"""
 	class Meta:
 		proxy = True
 
