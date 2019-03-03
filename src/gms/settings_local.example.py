@@ -99,7 +99,11 @@ SQUARE_APP_ID = '${SQUARE_APP_ID}'
 SQUARE_LOCATION = '${SQUARE_LOCATION}'
 SQUARE_ACCESS_TOKEN = '${SQUARE_SECRET}'
 
+# path to the OpenDispense2 client binary
 DISPENSE_BIN = '/usr/local/bin/dispense'
+
+# path to the OpenDispense2 logfile
+COKELOG_PATH = ROOT_DIR + '/cokelog'
 
 # configure the email backend (see https://docs.djangoproject.com/en/2.1/topics/email/)
 EMAIL_HOST = "secure.ucc.asn.au"

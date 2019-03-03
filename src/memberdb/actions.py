@@ -4,6 +4,9 @@ from functools import wraps, singledispatch
 
 from django.db.models import FieldDoesNotExist
 from django.http import HttpResponse
+from django.contrib import messages
+
+from squarepay.cokelog import try_update_from_dispense
 
 def prep_field(obj, field):
     """
@@ -120,3 +123,21 @@ def _(description):
         return download_as_csv(modeladmin, request, queryset)
     wrapped_action.short_description = description
     return wrapped_action
+
+def refresh_dispense_payment(modeladmin, request, queryset):
+    """ update paid status from cokelog, for Membership model """
+    num_changed = 0
+    membership_list = list(queryset)
+    for ms in membership_list:
+        if ms.date_paid is not None:
+            continue
+        if try_update_from_dispense(ms):
+            ms.save()
+            num_changed += 1
+    
+    if num_changed > 0:
+        messages.success(request, "Updated %d records" % num_changed)
+    else:
+        messages.warning(request, "No records updated")
+
+refresh_dispense_payment.short_description = "Update payment status from cokelog"
