@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import path, reverse
@@ -14,6 +16,33 @@ from memberdb.account import AccountForm, AccountView
 
 def get_model_url(pk, model_name):
 	return reverse('admin:memberdb_%s_change' % model_name, args=[pk])
+
+class MembershipRenewalFilter(admin.SimpleListFilter):
+	""" allow filtering Member records by renewal year / status """
+	""" see https://docs.djangoproject.com/en/2.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter """
+	title = 'Last renewal'
+	parameter_name = 'renewed'
+
+	def lookups(self, request, modeladmin):
+		""" returns a list of tuples """
+		# hardcode the starting year, since otherwise you need a fairly complex query
+		start_year = 2019
+		year = datetime.now().year + 1
+		return [ (str(x), str(x)) for x in range(start_year, year) ] + [ ('none', 'Never renewed') ]
+	
+	def queryset(self, request, queryset):
+		""" returns the filtered queryset based on the value passed to the request """
+		if self.value() is None:
+			# return the original queryset when parameter not specified
+			return queryset
+		
+		if self.value() == 'none':
+			# filter by finding a condition that will never be true for reverse relation (child)
+			# objects that exist, since you can't filter by "has no children"
+			return queryset.filter(memberships__id__isnull=True)
+
+		# filter via attributes on children / reverse relation (hurrah!)
+		return queryset.filter(memberships__date_submitted__year=int(self.value()))
 
 class ReadOnlyModelAdmin(admin.ModelAdmin):
 	""" helper mixin to make the admin page display only "View" rather than "Change" or "Add" """
@@ -50,7 +79,7 @@ class MembershipInline(admin.TabularInline):
 
 class MemberAdmin(admin.ModelAdmin):
 	list_display = ['first_name', 'last_name', 'display_name', 'username']
-	list_filter = ['is_guild', 'is_student']
+	list_filter = ['is_guild', 'is_student', MembershipRenewalFilter]
 	readonly_fields = ['member_updated', 'updated', 'created']
 	search_fields = list_display
 	actions = [download_as_csv]
