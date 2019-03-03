@@ -129,7 +129,7 @@ def refresh_dispense_payment(modeladmin, request, queryset):
     num_changed = 0
     membership_list = list(queryset)
     for ms in membership_list:
-        if ms.date_paid is not None or ms.username == '' or ms.username is None:
+        if ms.date_paid is not None:
             continue
         if try_update_from_dispense(ms):
             ms.save()
