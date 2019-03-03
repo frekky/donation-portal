@@ -95,6 +95,10 @@ def try_update_from_dispense(membership):
     Note: this WILL overwrite any existing payment information
     """
 
+    if membership.member.username == '' or membership.member.username is None:
+        # can't do anything with empty usernames
+        return False
+
     # check if anything has happened since last time
     if member_cokelog.is_loaded():
         member_cokelog.reload()
