@@ -129,14 +129,14 @@ def refresh_dispense_payment(modeladmin, request, queryset):
     num_changed = 0
     membership_list = list(queryset)
     for ms in membership_list:
-        if ms.date_paid is not None:
+        if ms.date_paid is not None or ms.username == '' or ms.username is None:
             continue
         if try_update_from_dispense(ms):
             ms.save()
             num_changed += 1
     
     if num_changed > 0:
-        messages.success(request, "Updated %d records" % num_changed)
+        messages.success(request, "Updated %d records of %d total" % (num_changed, len(membership_list)))
     else:
         messages.warning(request, "No records updated")
 
