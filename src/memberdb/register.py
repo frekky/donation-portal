@@ -22,28 +22,6 @@ from .models import Member, Membership, get_membership_choices, make_pending_mem
 from .forms import MyModelForm
 from .views import MyUpdateView
 
-def has_paid_dispense(membership):
-	script = settings.BASE_DIR + "/memberdb/has_paid_dispense.sh"
-
-	cmd = [script, membership.member.username, membership.get_dispense_item()]
-	#log.info("has_paid_dispense: " + str(cmd))
-	try:
-		# get a string containing the output of the program
-		# should be a datestring like "Feb 25 13:48:06"
-		res = subprocess.check_output(cmd, timeout=4, universal_newlines=True)
-		date = datetime.strptime(res, "%b %d %H:%M:%S")
-		return date
-	except CalledProcessError as e:
-		#log.warning("has_paid_dispense returned error code %d, output: '%s'" % (e.returncode, e.output))
-		pass
-	except TimeoutExpired as e:
-		#log.error(e)
-		pass
-	except ValueError:
-		#log.warning("cannot parse date '%s'" % res)
-		pass
-	return None
-
 """
 First step: enter an email address and some details (to fill at least a Member model) to create a pending membership.
 see https://docs.djangoproject.com/en/2.1/ref/models/fields/#error-messages
@@ -128,11 +106,6 @@ class RenewForm(RegisterRenewForm):
 	def save(self, commit=True):
 		m, ms = super().save(commit=False)
 		m.username = self.request.user.username
-		if ms.date_paid is None and ms.payment_method is None:
-			paid = has_paid_dispense(ms)
-			if paid is not None:
-				ms.date_paid = paid
-				ms.payment_method = 'dispense'
 
 		if (commit):
 			m.save()
