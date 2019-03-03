@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db.models import Q
 
 from .models import OldMember
 from memberdb.models import Member
@@ -22,24 +23,30 @@ def import_old_member(modeladmin, request, queryset):
             nm.display_name = om.real_name
             nm.is_guild = om.guild_member
             nm.phone_number = om.phone_number
-            nm.id_number = ""
+            nm.id_number = om.student_no
+            nm.id_desc = "student"
             nm.email_address = om.email_address
             if om.membership_type == 1: # O'day special
                 # O'day special or student
-                #membership_type = 'oday'
                 nm.is_student = True
             elif om.membership_type == 2: # student
-                #membership_type = 'student_and_guild' if nm.is_guild else 'student_only'
                 nm.is_student = True
             else: # non-student
-                #membership_type = 'guild_only' if nm.is_guild else 'non_student'
                 nm.is_student = False
 
             if (nm.username == '' or nm.username is None):
                 raise ValidationError("username cannot be blank")
+
+            # try to prevent creating duplicate records on import
+            is_dupe = Q(username=nm.username) | (Q(first_name=nm.first_name) & Q(last_name=nm.last_name)) | Q(id_number=nm.id_number)
+            dupes = Member.objects.filter(is_dupe)
+            if (dupes.count() > 0):
+                raise ValidationError("suspected duplicate member record")
+                
             nm.save()
             num_success += 1
         except BaseException as e:
+            breakpoint()
             modeladmin.message_user(request, 'Could not import record (%s): %s' % (om, e), level=messages.ERROR)
         
     if (num_success > 0):
