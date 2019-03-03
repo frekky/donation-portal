@@ -75,7 +75,7 @@ class CokeLog:
         self.last_offset = self.file.tell()
     
     def get_last_dispense(self, username, item_code=None, dispense_by=None):
-        if self.dispenses is None:
+        if self.dispenses is None or not username in self.dispenses:
             return None
 
         for r in reversed(self.dispenses[username]):
@@ -105,7 +105,6 @@ def try_update_from_dispense(membership):
     ms_disp = member_cokelog.get_last_dispense(
         membership.member.username,
         membership.get_dispense_item(),
-        None,
     )
 
     if ms_disp is not None:
