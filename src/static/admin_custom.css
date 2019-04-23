@@ -24,16 +24,16 @@
 #header {
     padding: 0;
     height: auto;
+	display: block;
 }
 
 #admin-header {
-    padding: 0px 40px;
+    padding: 10px 40px;
 }
 
 #admin-header, #container {
     overflow: auto;
 }
-
 
 .button {
     display: inline-block;
