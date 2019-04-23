@@ -45,6 +45,7 @@ deploy_testing:
     on_stop: stop_testing
   except:
       - master
+      - merge_requests
   
 deploy_staging:
   stage: deploy
