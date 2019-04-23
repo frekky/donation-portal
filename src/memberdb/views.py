@@ -39,6 +39,12 @@ class MemberMiddleware:
                 request.member.token = None
                 request.member.save()
 
+                if request.user.ldap_user is not None:
+                    # copy the LDAP groups so templates can access them
+                    request.member.groups = list(request.user.ldap_user.group_names)
+                else:
+                    request.member.groups = [ "gumby" ]
+
             # request.session is a dictionary-like object, its content is saved in the database
             # and only a session ID is stored as a browser cookie (by default, but is configurable)
             if 'member_id' in request.session:
