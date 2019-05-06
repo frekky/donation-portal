@@ -10,7 +10,7 @@ if COKELOG is None:
     log.warning("COKELOG_PATH is not defined, cannot sync payment status from dispense to DB")
 
 ALL_REGEX = r"^(?P<date>[A-Za-z]{3}\s+\d+\s[\d:]{8})\s(\w+)\sodispense2:\sdispense '([^']+)' \((?P<item>(coke|pseudo|snack|door):(\d{1,3}))\) for (?P<for>\w+) by (?P<by>\w+) \[cost\s+(\d+), balance\s+(\d+)\]$"
-MEMBERSHIP_REGEX = r"^(?P<date>[A-Za-z]{3}\s+\d+\s[\d:]{8})\s(\w+)\sodispense2:\sdispense '([^']+)' \((?P<item>(pseudo):(\d{1,3}))\) for (?P<for>\w+) by (?P<by>\w+) \[cost\s+(\d+), balance\s+(\d+)\]$"
+MEMBERSHIP_REGEX = r"^(?P<date>[A-Za-z]{3}\s+\d+\s[\d:]{8})\s(\w+)\sodispense2:\sdispense '(membership [^']+)' \((?P<item>(pseudo):(\d{1,3}))\) for (?P<for>\w+) by (?P<by>\w+) \[cost\s+(\d+), balance\s+(\d+)\]$"
 
 class CokeLog:
     regex = ALL_REGEX
@@ -83,7 +83,7 @@ class CokeLog:
                 continue
             if dispense_by is not None and r["by"] != dispense_by:
                 continue
-            return r["date"]
+            return r
         return None
 
 # create a "static" instance of cokelog
@@ -105,15 +105,21 @@ def try_update_from_dispense(membership):
     else:
         member_cokelog.open()
     
-    # look for entries like "dispense 'membership ...' (pseudo:) for <user> by <user> ..."
-    ms_disp = member_cokelog.get_last_dispense(
-        membership.member.username,
-        membership.get_dispense_item(),
-    )
+    # look for entries like "dispense 'membership ...' (pseudo:..) for <user> by <user> ..."
+    ms_disp = member_cokelog.get_last_dispense(membership.member.username)
 
     if ms_disp is not None:
-        membership.date_paid = ms_disp
-        membership.payment_method = 'dispense'
-        return True
+        if ms_disp['item'] != membership.get_dispense_item():
+            log.warn("user '%s': paid incorrect item '%s', not '%s' in dispense." % (
+                membership.member.username, ms_disp['item'], membership.get_dispense_item()
+            ))
+        else:
+            membership.date_paid = ms_disp['date']
+            membership.payment_method = 'dispense'
+            log.debug("user '%s': paid in cokelog" % membership.member.username)
+            return True
+    else:
+        log.info("user '%s': no paid membership in cokelog" % membership.member.username)
+
     return False
     
