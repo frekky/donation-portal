@@ -105,7 +105,7 @@ nav {
     overflow: auto; /* make navbar expand in case the tab buttons flow to a second row */
 }
 
-.navtab {
+.navtab, .userinfo {
     float: left;
     text-decoration: none;
     color: white;
@@ -129,6 +129,47 @@ nav {
 
 .navtab:last-child {
     border-right: 1.5px solid #555;
+}
+
+.userinfo {
+	float: right;
+	border-right: 0;
+	margin-right: 0;
+	font-variant-caps: normal;
+	border: none;
+	background-color: none;
+	padding: 19px 20px;
+}
+
+.userinfo.groups {
+	padding: 7px 20px;
+}
+
+.userinfo .username {
+	display: block;
+	line-height: 22px;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+/* height of group tags comes to 22px */
+.userinfo .group {
+	display: inline-block;
+	border-radius: 11px;
+	font-size: 12px;
+	line-height: 14px;
+	padding: 5px 8px 3px 8px;
+	background-color: #f6b9d8;
+	color: #000;
+	margin: 0 4px;
+}
+
+.userinfo .group.door {
+	background-color: #b9c6f6;
+}
+
+.userinfo .group.wheel {
+	background-color: #b9f6c8;
 }
 
 .member-details, .membership-details {

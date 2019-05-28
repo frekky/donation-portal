@@ -15,6 +15,8 @@
     {% if request.user.is_authenticated %}
     <b>You have no member record associated with this account.</b><br>
     Please <a href="{% url 'memberdb:renew' %}">renew your membership</a> to get started.
+    <br><br>
+    Note: you may have already paid for this year, but unless the username you entered is the same as the one you are using now, it will not work.
     {% else %}
     <b>Something went wrong and your membership details could not be retrieved.</b> Please try <a href="{% url 'memberdb:login' %}">logging in</a>.
     {% endif %}

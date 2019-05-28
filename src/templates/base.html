@@ -50,6 +50,17 @@
 			<a class="navtab {% if url_name == 'logout' %}active{% endif %}" href="{% url "memberdb:logout" %}">Logout</a>
 			{% endif %}
 			{% endwith %}
+
+			{# add the groups class only if we have groups to display #}
+			<div class="userinfo{% if request.user.is_authenticated %}{% if request.member %} groups{% endif %}">
+				<span class="username">Welcome, {{ request.user.username }}</span>
+				{% if request.member %}
+				{% for g in request.member.groups %}<span class="group {{ g }}">{{ g }}</span>{% endfor %}
+				{% endif %}
+			{% else %}">
+				<span class="username">Not logged in</span>
+			{% endif %}
+			</div>
 		</nav>
 		{% endblock %}
 

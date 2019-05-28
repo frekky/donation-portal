@@ -49,19 +49,18 @@ Workflow Design
 Environment Setup <a name="envsetup"></a>
 -----------------
 
-- This project uses Python 3.7
-- Install `python-virtualenv`
+- This project uses Python version >= 3.5
+- Install packages `apt-get install python3-virtualenv python3-dev build-essential libldap2-dev libsasl2-dev sqlite3`
 - `git clone https://gitlab.ucc.asn.au/frekk/uccportal uccportal`
 - `cd uccportal`
 - `virtualenv env`
 - Every time you want to do some uccportal development, do `source env/bin/activate` to set up your environment
-- Install packages needed by pip to build python dependencies: `apt-get install build-essential libldap2-dev libsasl2-dev`
 - Install python dependencies to local environment: `pip install -r pip-packages.txt`
-- Configure django: `cp gms/gms/settings_local.example.py gms/gms/settings_local.py`
-    - Edit `gms/gms/settings_local.py` and check that the database backend is configured correctly. (sqlite3 is fine for development)
-- Initialise the database: `gms/manage.py makemigrations && gms/manage.py migrate`
-    - Make sure you run this again if you make any changes to `gms/memberdb/models.py` to keep the DB schema in sync.
-- Run the local development server with `gms/manage.py runserver`
+- Configure django: `cp src/gms/settings_local.example.py src/gms/settings_local.py`
+    - Edit `src/gms/settings_local.py` and check that the database backend is configured correctly. (sqlite3 is fine for development)
+- Initialise the database: `src/manage.py makemigrations memberdb squarepay && src/manage.py migrate memberdb squarepay`
+    - Make sure you run this again if you make any changes to `src/memberdb/models.py` to keep the DB schema in sync.
+- Run the local development server with `src/manage.py runserver`
 
 -----------------------------------------------------------
 
@@ -97,9 +96,9 @@ is configured to run as an unprivileged user (ie. `www-data`)
 
     WSGIDaemonProcess uccportal python-home=/services/uccportal/env python-path=/services/uccportal/gms
     WSGIProcessGroup uccportal
-    WSGIScriptAlias / /services/uccportal/gms/gms/wsgi.py
+    WSGIScriptAlias / /services/uccportal/src/gms/wsgi.py
 
-    <Directory /services/uccportal/gms/gms>
+    <Directory /services/uccportal/src/gms>
         <Files wsgi.py>
             Require all granted
         </Files>
@@ -107,11 +106,11 @@ is configured to run as an unprivileged user (ie. `www-data`)
 
     Protocols h2 http:/1.1
 
-    <Directory /services/uccportal/gms/static>
+    <Directory /services/uccportal/media>
         Require all granted
     </Directory>
 
-    Alias /media /services/uccportal/gms/static
+    Alias /media /services/uccportal/media
 
     SSLEngine On
     SSLCertificateFile /etc/letsencrypt/live/portal.ucc.asn.au/cert.pem
@@ -124,11 +123,11 @@ is configured to run as an unprivileged user (ie. `www-data`)
 ```
 4. Configure django.
     - Follow the steps from [Environment Setup](#envsetup)
-    - `chmod 640 /services/uccportal/gms/gms/settings_local.py`
+    - `chmod 640 /services/uccportal/src/gms/settings_local.py`
     - `chgrp -R www-data /services/uccportal/`
     - `mkdir /var/log/apache2/uccportal && chgrp www-data /var/log/apache2/uccportal && chmod 775 /var/log/apache2/uccportal && chmod o+x /var/log/apache2`
     - Put the static files in the correct location for apache2 to find them:
-        - `gms/manage.py collectstatic`
+        - `src/manage.py collectstatic`
 
 
 Configuring the database backend
@@ -145,22 +144,22 @@ postgres=# CREATE USER uccportal WITH ENCRYPTED PASSWORD 'insert-password-here';
 postgres=# GRANT ALL on DATABASE uccportal to uccportal;
 ```
 
-Adjust `/services/uccportal/gms/gms/settings_local.py` to point to the new database (usually
+Adjust `/services/uccportal/src/gms/settings_local.py` to point to the new database (usually
 changing the databse name is enough).
 
 
 Making changes to data being collected
 --------------------------------------
 
-Edit `/service/uccportal/gms/memberdb/models.py`
-In `/services/uccportal/gms`, run `./manage.py makemigrations` to prepare the databae
+Edit `/service/uccportal/src/memberdb/models.py`
+In `/services/uccportal/src`, run `./manage.py makemigrations` to prepare the databae
 updates.
 
 ```
-uccportal:~# cd /services/uccportal/gms/
-uccportal:/services/uccportal/gms# ./manage.py check
+uccportal:~# cd /services/uccportal/src/
+uccportal:/services/uccportal/src# ./manage.py check
 System check identified no issues (0 silenced).
-uccportal:/services/uccportal/gms# ./manage.py migrate --run-syncdb
+uccportal:/services/uccportal/src# ./manage.py migrate --run-syncdb
 
 ...
 You just installed Django's auth system, which means you don't have any
@@ -168,7 +167,7 @@ You just installed Django's auth system, which means you don't have any
 Would you like to create one now? (yes/no): no
 
 Now restart MemberDB by runing
-uccportal:/services/uccportal/gms# touch gms/wsgi.py
+uccportal:/services/uccportal/src# touch gms/wsgi.py
 ```
 
 Now go ahead and log in to the website. It will be totally fresh, with all

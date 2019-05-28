@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from memberdb.views import MemberAccessMixin
-from memberdb.models import Membership, MEMBERSHIP_TYPES
+from memberdb.models import Membership
 
 from .models import MembershipPayment, CardPayment
 from . import payments

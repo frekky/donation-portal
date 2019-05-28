@@ -129,22 +129,26 @@ LOGGING = {
 		'django': {
 			'handlers':['logfile', 'console'],
 			'propagate': True,
-			'level': LOG_LEVEL,
+			'level': LOG_LEVEL_DJANGO,
 		},
 		'django.db.backends': {
 			'handlers': ['logfile', 'console'],
-			'level': LOG_LEVEL,
+			'level': LOG_LEVEL_DJANGO,
 			'propagate': False,
 		},
 		'django.contrib.auth': {
 			'handlers': ['logfile', 'console'],
-			'level': LOG_LEVEL,
+			'level': LOG_LEVEL_DJANGO,
 		},
 		'django_auth_ldap': {
-			'level': LOG_LEVEL,
+			'level': LOG_LEVEL_DJANGO,
 			'handlers': ['logfile', 'console'],
 		},
 		'squarepay': {
+			'level': LOG_LEVEL,
+			'handlers': ['logfile', 'console'],
+		},
+		'memberdb': {
 			'level': LOG_LEVEL,
 			'handlers': ['logfile', 'console'],
 		}

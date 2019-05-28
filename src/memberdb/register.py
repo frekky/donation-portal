@@ -19,7 +19,7 @@ from django.conf import settings
 from squarepay.models import MembershipPayment
 from squarepay.dispense import get_item_price
 
-from .models import Member, Membership, get_membership_choices, make_pending_membership, MEMBERSHIP_TYPES
+from .models import Member, Membership, get_membership_choices, make_pending_membership
 from .forms import MyModelForm
 from .views import MyUpdateView
 
