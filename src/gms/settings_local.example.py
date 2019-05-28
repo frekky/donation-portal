@@ -58,10 +58,10 @@ AUTH_LDAP_GLOBAL_OPTIONS = {
 
 # LDAP admin settings - NOT for django_auth_ldap
 LDAP_BASE_DN = "DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au"
-LDAP_USER_SEARCH_DN = 'CN=Users,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au'
+LDAP_USER_SEARCH_DN = 'CN=Users,' + LDAP_BASE_DN
 
 # settings used by memberdb LDAP backend and django_auth_ldap
-AUTH_LDAP_BIND_DN = "CN=uccportal,CN=Users,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au"
+AUTH_LDAP_BIND_DN = "CN=uccportal,CN=Users," + LDAP_BASE_DN
 AUTH_LDAP_BIND_PASSWORD = "${LDAP_SECRET}"
 
 # just for django_auth_ldap
@@ -74,13 +74,14 @@ AUTH_LDAP_GROUP_TYPE = ActiveDirectoryGroupType()
 AUTH_LDAP_FIND_GROUP_PERMS = True
 
 # speed it up by not having to search for the username, we can predict the DN
-AUTH_LDAP_USER_DN_TEMPLATE = 'CN=%(user)s,CN=Users,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au'
+AUTH_LDAP_USER_DN_TEMPLATE = 'CN=%(user)s,CN=Users,' + LDAP_BASE_DN
 
-# include the search thing anyway, just in case it's needed somewhere...
-AUTH_LDAP_USER_SEARCH = LDAPSearch('CN=%(user)s,CN=Users,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au',
-	ldap.SCOPE_BASE, "(objectClass=user)")
+# this is necessary where the user DN can't be predicted, ie. if the
+# user object is named by full name rather than username
+#AUTH_LDAP_USER_SEARCH = LDAPSearch('CN=Users,' + LDAP_BASE_DN,
+#	ldap.SCOPE_SUBTREE, "(&(objectClass=user)(sAMAccountName=%(user)s))")
 
-AUTH_LDAP_GROUP_SEARCH = LDAPSearch("OU=Groups,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au",
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch("OU=Groups," + LDAP_BASE_DN,
 	ldap.SCOPE_SUBTREE, "(objectClass=group)")
 
 # Populate the Django user from the LDAP directory.
@@ -91,9 +92,9 @@ AUTH_LDAP_USER_ATTR_MAP = {
 	"email": "email",
 }
 
-DOOR_GROUP_QUERY = LDAPGroupQuery("CN=door,OU=Groups,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au")
-COMMITTEE_GROUP_QUERY = LDAPGroupQuery("CN=committee,OU=Groups,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au")
-WHEEL_GROUP_QUERY = LDAPGroupQuery("CN=wheel,OU=Groups,DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au")
+DOOR_GROUP_QUERY = LDAPGroupQuery("CN=door,OU=Groups," + LDAP_BASE_DN)
+COMMITTEE_GROUP_QUERY = LDAPGroupQuery("CN=committee,OU=Groups," + LDAP_BASE_DN)
+WHEEL_GROUP_QUERY = LDAPGroupQuery("CN=wheel,OU=Groups," + LDAP_BASE_DN)
 
 ADMIN_ACCESS_QUERY = COMMITTEE_GROUP_QUERY | DOOR_GROUP_QUERY | WHEEL_GROUP_QUERY
 
