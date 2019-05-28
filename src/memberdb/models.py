@@ -11,52 +11,53 @@ import subprocess
 import ldap
 
 """
-dictionary of membership types & descriptions, should be updated if these are changed in dispense.
+list of membership types & descriptions, should be updated if these are changed in dispense.
+note: this is a list of tuples of key and value as dict, if it was a dict the database models get confused
 """
-MEMBERSHIP_TYPES = {
-	'oday': {
+MEMBERSHIP_TYPES = [
+	('oday', {
 		'dispense':'pseudo:11',
 		'desc':'O\' Day Special - first time members only',
 		'is_guild':True,
 		'is_student':True,
 		'must_be_fresh':True,
-	},
-	'student_and_guild': {
+	}),
+	('student_and_guild', {
 		'dispense':'pseudo:10',
 		'desc':'Student and UWA Guild member',
 		'is_guild':True,
 		'is_student':True,
 		'must_be_fresh':False,
-	},
-	'student_only': {
+	}),
+	('student_only', {
 		'dispense':'pseudo:9',
 		'desc':'Student and not UWA Guild member',
 		'is_guild':False,
 		'is_student':True,
 		'must_be_fresh':False,
-	},
-	'guild_only': {
+	}),
+	('guild_only', {
 		'dispense':'pseudo:8',
 		'desc':'Non-Student and UWA Guild member',
 		'is_guild':True,
 		'is_student':False,
 		'must_be_fresh':False,
-	},
-	'non_student': {
+	}),
+	('non_student', {
 		'dispense':'pseudo:7',
 		'desc':'Non-Student and not UWA Guild member',
 		'is_guild':False,
 		'is_student':False,
 		'must_be_fresh':False,
-	},
-	'lifer': {
+	}),
+	('lifer', {
 		'dispense':'',
 		'desc':'Life member',
 		'is_guild':False,
 		'is_student':False,
 		'must_be_fresh':False,
-	}
-}
+	})
+]
 
 def get_membership_choices(is_renew=None, get_prices=True):
 	"""
@@ -64,7 +65,7 @@ def get_membership_choices(is_renew=None, get_prices=True):
 	also dynamically fetch the prices from dispense (if possible)
 	"""
 	choices = []
-	for key, val in MEMBERSHIP_TYPES.items():
+	for key, val in MEMBERSHIP_TYPES:
 		if (val['must_be_fresh'] and is_renew == True):
 			# if you have an account already, you don't qualify for the fresher special
 			continue
@@ -90,7 +91,7 @@ def get_membership_choices(is_renew=None, get_prices=True):
 def get_membership_type(member):
 	best = 'non_student'
 	is_fresh = member.memberships.all().count() == 0
-	for i, t in MEMBERSHIP_TYPES.items():
+	for i, t in MEMBERSHIP_TYPES:
 		if (t['must_be_fresh'] == is_fresh and t['is_student'] == member.is_student and t['is_guild'] == member.is_guild):
 			best = i
 			break
@@ -225,11 +226,16 @@ class Membership (models.Model):
 	def __str__ (self):
 		return "Member [%s] (%s) renewed membership on %s" % (self.member.username, self.member.display_name, self.date_submitted.strftime("%Y-%m-%d"))
 
+	def get_membership_type(self):
+		for key, val in MEMBERSHIP_TYPES:
+			if key == self.membership_type:
+				return val
+
 	def get_dispense_item(self):
-		return MEMBERSHIP_TYPES[self.membership_type]['dispense']
+		return self.get_membership_type()['dispense']
 
 	def get_pretty_type(self):
-		return MEMBERSHIP_TYPES[self.membership_type]['desc']
+		return self.get_membership_type()['desc']
 
 	class Meta:
 		verbose_name = "Membership renewal record"

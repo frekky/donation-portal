@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import AccessMixin
 from django.utils import timezone
 from formtools.wizard.views import SessionWizardView
 
-from .models import Member, IncAssocMember, Membership, MEMBERSHIP_TYPES, TokenConfirmation
+from .models import Member, IncAssocMember, Membership, TokenConfirmation
 from .forms import MemberHomeForm
 
 class MemberMiddleware:
