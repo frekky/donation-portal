@@ -35,7 +35,7 @@ deploy_testing:
     - rm -f /etc/uwsgi/vassals/$CI_COMMIT_REF_SLUG.ini
     - mkdir .db
     - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
-    - chmod 600 src/gms/settings_local.p
+    - chmod 600 src/gms/settings_local.py
     - ln -srT ./ /var/www/test/$CI_COMMIT_REF_SLUG
     - python src/manage.py collectstatic
     - python src/manage.py makemigrations
