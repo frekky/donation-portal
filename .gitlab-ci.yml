@@ -18,6 +18,10 @@ run_tests:
     - echo "Running tests"
     - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
     - python src/manage.py check
+  only:
+    - /^.*-test(ing)?$/
+    - /^(test|devops)\/.*$/
+    - master
 
 deploy_testing:
   stage: deploy
@@ -46,10 +50,8 @@ deploy_testing:
     url: https://$CI_COMMIT_REF_SLUG.test.ucc.asn.au
     on_stop: stop_testing
   only:
-      - *-test
-      - *-testing
-      - test/*
-      - devops/*
+    - /^.*-test(ing)?$/
+    - /^(test|devops)\/.*$/
   except:
       - master
       - merge_requests
@@ -90,10 +92,8 @@ stop_testing:
     name: test/$CI_COMMIT_REF_SLUG
     action: stop
   only:
-    - *-test
-    - *-testing
-    - test/*
-    - devops/*
+    - /^.*-test(ing)?$/
+    - /^(test|devops)\/.*$/
   except: 
     - master
   script:
