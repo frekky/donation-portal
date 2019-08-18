@@ -45,6 +45,11 @@ deploy_testing:
     name: test/$CI_COMMIT_REF_SLUG
     url: https://$CI_COMMIT_REF_SLUG.test.ucc.asn.au
     on_stop: stop_testing
+  only:
+      - *-test
+      - *-testing
+      - test/*
+      - devops/*
   except:
       - master
       - merge_requests
@@ -84,6 +89,11 @@ stop_testing:
   environment:
     name: test/$CI_COMMIT_REF_SLUG
     action: stop
+  only:
+    - *-test
+    - *-testing
+    - test/*
+    - devops/*
   except: 
     - master
   script:
