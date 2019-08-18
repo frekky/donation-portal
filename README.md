@@ -1,5 +1,6 @@
 uccportal - the UCC Computer Controlled Proletarian Organisational Roster That Accesses LDAP [was GMS - Gumby Management System]
 ================================================================================================================================
+[![pipeline status](https://gitlab.ucc.asn.au/frekk/uccportal/badges/master/pipeline.svg)](https://gitlab.ucc.asn.au/frekk/uccportal/commits/master)
 
 This is designed to be the ultimate membership management suite for UCC. Signups are electronic and automatic, data is able to be conveniently stored in the member database and some of it is even automatically validated.
 
