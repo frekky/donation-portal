@@ -49,7 +49,7 @@ from django_auth_ldap.config import LDAPSearch, ActiveDirectoryGroupType, LDAPGr
 
 # this could be ad.ucc.gu.uwa.edu.au but that doesn't resolve externally -
 # useful for testing, but should be changed in production so failover works
-AUTH_LDAP_SERVER_URI = 'ldaps://ad.ucc.gu.uwa.edu.au'
+AUTH_LDAP_SERVER_URI = 'ldaps://${AD_DOMAIN}'
 
 # This is also a bad idea, should be changed in production
 AUTH_LDAP_GLOBAL_OPTIONS = {
@@ -57,7 +57,7 @@ AUTH_LDAP_GLOBAL_OPTIONS = {
 }
 
 # LDAP admin settings - NOT for django_auth_ldap
-LDAP_BASE_DN = "DC=ad,DC=ucc,DC=gu,DC=uwa,DC=edu,DC=au"
+LDAP_BASE_DN = '${AD_BASEDN}' 
 LDAP_USER_SEARCH_DN = 'CN=Users,' + LDAP_BASE_DN
 
 # settings used by memberdb LDAP backend and django_auth_ldap

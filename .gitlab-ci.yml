@@ -18,31 +18,40 @@ run_tests:
     - echo "Running tests"
     - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
     - python src/manage.py check
+  only:
+    - /^.*-test(ing)?$/
+    - /^(test|devops)\/.*$/
+    - master
 
 deploy_testing:
   stage: deploy
   tags:
     - test
   variables:
-    DB_NAME : /var/www/test/$CI_COMMIT_REF_NAME/.db/members.db
-    DEPLOY_HOST : $CI_COMMIT_REF_NAME.test.ucc.asn.au
+    AD_DOMAIN : ad.v.ucc.asn.au
+    AD_BASEDN : DC=AD,DC=v,DC=ucc,DC=asn,DC=AU
+    DB_NAME : /var/www/test/$CI_COMMIT_REF_SLUG/.db/members.db
+    DEPLOY_HOST : $CI_COMMIT_REF_SLUG.test.ucc.asn.au
     SHORT_ENV_NAME : TEST
   script:
     - echo "Deploy to test"
-    - rm -f /var/www/test/$CI_COMMIT_REF_NAME
-    - rm -f /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini
+    - rm -f /var/www/test/$CI_COMMIT_REF_SLUG
+    - rm -f /etc/uwsgi/vassals/$CI_COMMIT_REF_SLUG.ini
     - mkdir .db
     - envsubst < src/gms/settings_local.example.py > src/gms/settings_local.py
     - chmod 600 src/gms/settings_local.py
-    - ln -srT ./ /var/www/test/$CI_COMMIT_REF_NAME
+    - ln -srT ./ /var/www/test/$CI_COMMIT_REF_SLUG
     - python src/manage.py collectstatic
     - python src/manage.py makemigrations
     - python src/manage.py migrate --run-syncdb
-    - ln -s /etc/uwsgi/vassals/test.skel /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini
+    - ln -s /etc/uwsgi/vassals/test.skel /etc/uwsgi/vassals/$CI_COMMIT_REF_SLUG.ini
   environment:
-    name: test/$CI_COMMIT_REF_NAME
-    url: https://$CI_COMMIT_REF_NAME.test.ucc.asn.au
+    name: test/$CI_COMMIT_REF_SLUG
+    url: https://$CI_COMMIT_REF_SLUG.test.ucc.asn.au
     on_stop: stop_testing
+  only:
+    - /^.*-test(ing)?$/
+    - /^(test|devops)\/.*$/
   except:
       - master
       - merge_requests
@@ -52,6 +61,8 @@ deploy_staging:
   tags:
     - stage
   variables:
+    AD_DOMAIN : ad.v.ucc.asn.au
+    AD_BASEDN : DC=AD,DC=v,DC=ucc,DC=asn,DC=AU
     DB_NAME : /var/www/stage/.db/members.db
     DEPLOY_HOST : stage.test.ucc.asn.au
     SHORT_ENV_NAME : STAGE
@@ -78,10 +89,13 @@ stop_testing:
     GIT_STRATEGY: none
   when: manual
   environment:
-    name: test/$CI_COMMIT_REF_NAME
+    name: test/$CI_COMMIT_REF_SLUG
     action: stop
+  only:
+    - /^.*-test(ing)?$/
+    - /^(test|devops)\/.*$/
   except: 
     - master
   script:
-    - rm -f /var/www/test/$CI_COMMIT_REF_NAME
-    - rm -f /etc/uwsgi/vassals/$CI_COMMIT_REF_NAME.ini
+    - rm -f /var/www/test/$CI_COMMIT_REF_SLUG
+    - rm -f /etc/uwsgi/vassals/$CI_COMMIT_REF_SLUG.ini
