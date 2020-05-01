@@ -6,6 +6,7 @@
 
 # local testing database stuff
 .db/
+*.db
 misc/pg.json
 
 # local virtalenv

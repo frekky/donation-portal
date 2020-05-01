@@ -9,22 +9,19 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 # import local settings
-from gms.settings_local import *
+from donations.settings_local import *
 
 # Application definition
 
 INSTALLED_APPS = (
-	'sslserver',
 	'django.contrib.admin',
 	'django.contrib.auth',
 	'django.contrib.contenttypes',
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
-	'memberdb',
-	'import_members',
+	'donationtracker',
 	'squarepay',
-	'formtools',
 )
 
 MIDDLEWARE = [
@@ -34,12 +31,11 @@ MIDDLEWARE = [
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
-	'memberdb.views.MemberMiddleware',
 ]
 
-ROOT_URLCONF = 'gms.urls'
+ROOT_URLCONF = 'donations.urls'
 
-WSGI_APPLICATION = 'gms.wsgi.application'
+WSGI_APPLICATION = 'donations.wsgi.application'
 
 DATE_INPUT_FORMATS = ("%d-%m-%y")
 
@@ -56,11 +52,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-LOGIN_URL = 'memberdb:login'
-LOGIN_REDIRECT_URL = 'memberdb:index'
-
-DATABASE_ROUTERS = ['import_members.db.MemberDbRouter']
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 STATICFILES_DIRS = [
@@ -71,7 +62,6 @@ STATIC_ROOT = os.path.join(ROOT_DIR, 'media')
 
 AUTHENTICATION_BACKENDS = [
 	# see https://django-auth-ldap.readthedocs.io/en/latest for configuration info
-	'django_auth_ldap.backend.LDAPBackend',
 	'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -88,7 +78,6 @@ TEMPLATES = [
 				'django.template.context_processors.request',
 				'django.contrib.auth.context_processors.auth',
 				'django.contrib.messages.context_processors.messages',
-				'gms.context_processors.global_settings'
 			],
 		},
 	},
@@ -140,17 +129,9 @@ LOGGING = {
 			'handlers': ['logfile', 'console'],
 			'level': LOG_LEVEL_DJANGO,
 		},
-		'django_auth_ldap': {
-			'level': LOG_LEVEL_DJANGO,
-			'handlers': ['logfile', 'console'],
-		},
 		'squarepay': {
 			'level': LOG_LEVEL,
 			'handlers': ['logfile', 'console'],
 		},
-		'memberdb': {
-			'level': LOG_LEVEL,
-			'handlers': ['logfile', 'console'],
-		}
 	},
 }

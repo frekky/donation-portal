@@ -4,8 +4,6 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 
-from memberdb.models import Membership, make_token
-
 class CardPayment(models.Model):
     description     = models.CharField('Description', max_length=255)
     amount          = models.IntegerField('Amount in cents', null=False, blank=False)
@@ -19,14 +17,3 @@ class CardPayment(models.Model):
         self.is_paid = True
         self.date_paid = timezone.now()
         self.save()
-
-class MembershipPayment(CardPayment):
-    """
-    Link the payment to a specific membership
-    """
-    membership      = models.ForeignKey(Membership, on_delete=models.CASCADE, related_name='payments')
-
-    def set_paid(self):
-        self.membership.date_paid = timezone.now()
-        self.membership.payment_method = 'online'
-        super().set_paid()

@@ -1,9 +1,8 @@
 from django.urls import path, include
-
-from . import admin
+from django.contrib import admin
 
 urlpatterns = [
-    path('', include('memberdb.urls')),
+#    path('', include('donationtracker.urls')),
     path('admin/', admin.site.urls),
     path('payment/', include('squarepay.urls')),
 ]
