@@ -12,7 +12,7 @@
     </span>
     </div>
     {% block form %}
-    <form action="{% block action_url %}{% url 'memberdb:register' %}{% endblock %}" method="post">
+    <form action="{% block action_url %}#{% endblock %}" method="post">
 
         {% csrf_token %}
 
