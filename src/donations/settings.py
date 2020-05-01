@@ -14,6 +14,7 @@ from donations.settings_local import *
 # Application definition
 
 INSTALLED_APPS = (
+	'sslserver',
 	'django.contrib.admin',
 	'django.contrib.auth',
 	'django.contrib.contenttypes',
@@ -115,20 +116,20 @@ LOGGING = {
 		},
 	},
 	'loggers': {
-		'django': {
-			'handlers':['logfile', 'console'],
-			'propagate': True,
-			'level': LOG_LEVEL_DJANGO,
-		},
-		'django.db.backends': {
-			'handlers': ['logfile', 'console'],
-			'level': LOG_LEVEL_DJANGO,
-			'propagate': False,
-		},
-		'django.contrib.auth': {
-			'handlers': ['logfile', 'console'],
-			'level': LOG_LEVEL_DJANGO,
-		},
+#		'django': {
+#			'handlers':['logfile', 'console'],
+#			'propagate': True,
+#			'level': LOG_LEVEL_DJANGO,
+#		},
+#		'django.db.backends': {
+#			'handlers': ['logfile', 'console'],
+#			'level': LOG_LEVEL_DJANGO,
+#			'propagate': False,
+#		},
+#		'django.contrib.auth': {
+#			'handlers': ['logfile', 'console'],
+#			'level': LOG_LEVEL_DJANGO,
+#		},
 		'squarepay': {
 			'level': LOG_LEVEL,
 			'handlers': ['logfile', 'console'],

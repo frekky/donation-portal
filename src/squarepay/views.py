@@ -61,6 +61,7 @@ class PaymentFormView(DetailView, PaymentFormMixin):
     slug_field = 'token'
     slug_url_kwarg = 'token'
     query_pk_and_slug = True
+    template_name = 'payment_form.html'
 
     def get_completed_url(self):
         return self.get_object().get_absolute_url()

@@ -1,66 +1,27 @@
-uccportal - the UCC Computer Controlled Proletarian Organisational Roster That Accesses LDAP [was GMS - Gumby Management System]
-================================================================================================================================
-[![pipeline status](https://gitlab.ucc.asn.au/frekk/uccportal/badges/master/pipeline.svg)](https://gitlab.ucc.asn.au/frekk/uccportal/commits/master)
+Online Donation Tracker
+=======================
 
-This is designed to be the ultimate membership management suite for UCC. Signups are electronic and automatic, data is able to be conveniently stored in the member database and some of it is even automatically validated.
+An online donation tracker system for the Cameron Hall Charity Vigil 2020, which is being run online this year #covid-19
 
 Features
 --------
 
+- Donations can be made online using the [Square Payment Form](https://docs.connect.squareup.com/payments/sqpaymentform/sqpaymentform-overview)
 - Written in Python 3 using [Django](https://www.djangoproject.com/)
-- Rolling membership database, retaining data from year to year
-- Registration form for new members to sign themselves up
-- Connects to Active Directory to authenticate existing users & allow them to renew their own membership
-- Administrative interface to approve pending memberships
-- Online payment of membership fees using [Square Payment Form](https://docs.connect.squareup.com/payments/sqpaymentform/sqpaymentform-overview)
-
-Stuff to do
------------
-
-See the [Issue tracker](https://gitlab.ucc.asn.au/frekk/uccportal/issues/) on GitLab
-
-Workflow Design
----------------
-
-- __Use case 1: new member__:
-    1. New member enters details on registration form, submits
-        - Thankyou page: contains link to edit some submission details
-        - Membership confirmation sent to student email if is student
-        - Immediate payment is possible using the online payment form, otherwise can be done later
-    2. Door member logs in and verifies that details are correct, can do payment in-person
-        - Cash: door member takes cash and enters amount paid by cash
-        - Card (in person): door member enters amount to charge, processed via Square App or custom POS app (Android)
-        - Card (online): door member enters amount to charge, can either enter card details directly or new member can access payment form
-        - Dispense note: all payments (even before account creation) processed through dispense, money is then given to newly created accounts following step 3
-    3. Door member approves pending membership
-        - Pending memberships are marked as approved (note: pending / approved records _are_ in the same table)
-        - Account is created in AD/dispense using provided details
-            - Update dispense with payment information after account creation - transfer money from `uccportal` account to `$newuser` account (for example)
-            - User gets email with link to login & change details
-    4. New member gets notification (ie. email), clicks link to set password
-- __Use case 2: existing member__ (possibly with locked account):
-    1. Existing member (with existing AD/LDAP account) logs in and enters details on renewal/registration form (or confirms existing stored details are correct)
-        - Pending membership record created
-    2. Door member logs in to approve membership, selects payment method as per above
-    3. Door member approves pending membership renewal
-        - Pending membership record transferred to main members table
-    4. Renewing member gets email confirming payment / renewal success
-        - confirmation link to reactivate account? should this happen between steps 1-2?
 
 Environment Setup <a name="envsetup"></a>
 -----------------
 
 - This project uses Python version >= 3.5
-- Install packages `apt-get install python3-virtualenv python3-dev build-essential libldap2-dev libsasl2-dev sqlite3`
-- `git clone https://gitlab.ucc.asn.au/frekk/uccportal uccportal`
+- Install packages `apt-get install python3-virtualenv python3-dev build-essential sqlite3`
+- `git clone https://github.com/frekky/donation-portal`
 - `cd uccportal`
 - `virtualenv env`
 - Every time you want to do some uccportal development, do `source env/bin/activate` to set up your environment
 - Install python dependencies to local environment: `pip install -r pip-packages.txt`
-- Configure django: `cp src/gms/settings_local.example.py src/gms/settings_local.py`
-    - Edit `src/gms/settings_local.py` and check that the database backend is configured correctly. (sqlite3 is fine for development)
-- Initialise the database: `src/manage.py makemigrations memberdb squarepay && src/manage.py migrate memberdb squarepay`
-    - Make sure you run this again if you make any changes to `src/memberdb/models.py` to keep the DB schema in sync.
+- Configure django: `cp src/donations/settings_local.example.py src/donations/settings_local.py`
+    - Edit `src/donations/settings_local.py` and check that the database backend is configured correctly. (sqlite3 is fine for development)
+- Initialise the database: `src/manage.py makemigrations squarepay && src/manage.py migrate squarepay`
 - Run the local development server with `src/manage.py runserver`
 
 -----------------------------------------------------------
@@ -130,60 +91,8 @@ is configured to run as an unprivileged user (ie. `www-data`)
     - Put the static files in the correct location for apache2 to find them:
         - `src/manage.py collectstatic`
 
-
-Configuring the database backend
---------------------------------
-
-To set up a the database,
-
-(as root on mussel)
-```
-mussel:~# su - postgres
-postgres@mussel:~$ psql
-postgres=# create database uccportal;
-postgres=# CREATE USER uccportal WITH ENCRYPTED PASSWORD 'insert-password-here';
-postgres=# GRANT ALL on DATABASE uccportal to uccportal;
-```
-
-Adjust `/services/uccportal/src/gms/settings_local.py` to point to the new database (usually
-changing the databse name is enough).
-
-
-Making changes to data being collected
---------------------------------------
-
-Edit `/service/uccportal/src/memberdb/models.py`
-In `/services/uccportal/src`, run `./manage.py makemigrations` to prepare the databae
-updates.
-
-```
-uccportal:~# cd /services/uccportal/src/
-uccportal:/services/uccportal/src# ./manage.py check
-System check identified no issues (0 silenced).
-uccportal:/services/uccportal/src# ./manage.py migrate --run-syncdb
-
-...
-You just installed Django's auth system, which means you don't have any
- superusers defined.
-Would you like to create one now? (yes/no): no
-
-Now restart MemberDB by runing
-uccportal:/services/uccportal/src# touch gms/wsgi.py
-```
-
-Now go ahead and log in to the website. It will be totally fresh, with all
-committee, door and wheel members being made superusers on first login.
-
-If you would like to allow other users to help out with data entry,
-ask them to log in. After the login attempt is denied, you will be able to
-find their name in the Auth/Users area of the site. Turn on their staff status
-and allow them access to the memberdb permissions.
-
-A CSV download function has been added - select the members you want to
-download in the administration interface, then choose Download as CSV file
-from the Actions menu.
-
 Credits
 -------
+- Hacked out of the remains of `uccportal` (https://gitlab.ucc.asn.au/ucc/uccportal)
 - Adapted from `Gumby Management System` written by David Adam <zanchey@ucc.gu.uwa.edu.au>
 - Derived from MemberDB by Danni Madeley
