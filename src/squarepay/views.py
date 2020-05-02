@@ -51,7 +51,7 @@ class PaymentFormMixin:
         # redirect to success URL, or redisplay the form with a success message if none is given
         return HttpResponseRedirect(self.get_completed_url())
 
-class PaymentFormView(DetailView, PaymentFormMixin):
+class PaymentFormView(PaymentFormMixin, DetailView):
     """
     Handles the backend stuff for the Square payment form.
     See https://docs.connect.squareup.com/payments/sqpaymentform/setup
@@ -61,7 +61,7 @@ class PaymentFormView(DetailView, PaymentFormMixin):
     slug_field = 'token'
     slug_url_kwarg = 'token'
     query_pk_and_slug = True
-    template_name = 'payment_form.html'
+    #template_name = 'payment_form.html'
 
     def get_completed_url(self):
         return self.get_object().get_absolute_url()

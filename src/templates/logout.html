@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}UCC Member Logout{% endblock %}
+{% block title %}Logout{% endblock %}
 
 {% block extrahead %}
 {{ block.super }}
@@ -16,11 +16,11 @@
 <div class="form-container">
 
 <p>
-    <b>You are now logged out of MemberDB.</b>
+    <b>You are now logged out.</b>
 </p>
 
 <p>
-    <a href="{% url 'memberdb:login' %}">Click here</a> to log back in again.
+    <a href="{% url 'login' %}">Click here</a> to log back in again.
 </p>
 
 {% endblock %}

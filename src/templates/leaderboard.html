@@ -1,0 +1,38 @@
+{% extends "base_form.html" %}
+{% load static %}
+{% block title %}Donation Tracker{% endblock %}
+{% block content_title %}
+    <h1>Donation Tracker</h1>
+    {% if request.user.is_authenticated %}
+    <h3>Welcome, {{ request.user.first_name }} {{ request.user.last_name }} (<code>{{ request.user.username }}</code>)</h3>
+    {% else %}
+    <h3>Welcome. Please login or register to get started</h3>
+    {% endif %}
+{% endblock %}
+
+{% block tips %}{% endblock %}
+
+{% block extra_preform %}
+{% for d in request.user.donations %}
+<div class="form-row">
+    <table>
+
+    </table>
+</div>
+{% endfor %}
+<br>
+{% endblock %}
+
+{% block form %}
+{% if object %} {{ block.super }} {% endif %}
+{% endblock %}
+
+{% block postform %}
+<div class="form-row">
+<p class="help">To update your other membership details, please talk to a door or committee member.</p>
+</div>
+{% endblock %}
+
+{% block action_url %}{% url 'memberdb:home' %}{% endblock %}
+
+{% block action_text %}Update details{% endblock %}

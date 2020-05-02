@@ -61,6 +61,8 @@ STATICFILES_DIRS = [
 STATIC_URL = '/media/'
 STATIC_ROOT = os.path.join(ROOT_DIR, 'media')
 
+LOGIN_REDIRECT_URL = '/'
+
 AUTHENTICATION_BACKENDS = [
 	# see https://django-auth-ldap.readthedocs.io/en/latest for configuration info
 	'django.contrib.auth.backends.ModelBackend',

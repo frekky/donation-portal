@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}UCC Member Login{% endblock %}
+{% block title %}Donations Login{% endblock %}
 
 {% block extrahead %}
 {{ block.super }}
@@ -9,7 +9,7 @@
 {{ form.media }}
 {% endblock %}
 
-{% block content_title %}<h1>Login to MemberDB</h1>{% endblock %}
+{% block content_title %}<h1>Log in to donate</h1>{% endblock %}
 
 {% block content %}
 
@@ -36,17 +36,12 @@
     You are already logged in as {{ user.username }}.
     Would you like to login to a different account?
 {% else %}
-    <b>Please enter your UCC username and password below.</b> <br><br>
-    {% if not request.member %}
-    If you do not have a UCC account yet, please apply for a membership by going to the <a href="{% url 'memberdb:register' %}">registration page</a>.
-    {% else %}
-    It appears you have already registered. If you have not yet received your UCC login details, please <a href="https://www.ucc.asn.au/aboutucc/contact.ucc">contact us</a>.
-    {% endif %}
+    <b>Enter your email and password below.</b> Click "Register" if you don't have an account. <br><br>
 {% endif %}
 </p>
 </div>
 
-<form action="{% url 'memberdb:login' %}" method="post" id="login-form">
+<form action="{% url 'login' %}" method="post" id="login-form">
   {% csrf_token %}
   <div class="form-row">
     {{ form.username.errors }}
